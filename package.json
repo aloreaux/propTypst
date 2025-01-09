@@ -1,0 +1,17 @@
+{
+  "name": "proptypst",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@myriaddreamin/typst-ts-web-compiler": "^0.5.1",
+    "@myriaddreamin/typst.ts": "^0.5.1",
+    "typst": "^0.10.0-8"
+  }
+}

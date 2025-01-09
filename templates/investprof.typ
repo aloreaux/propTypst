@@ -1,0 +1,80 @@
+#import "template.typ": *
+
+= Investment Profile
+
+#set align(horizon + center)
+
+/*#let testData = (
+  "Product:": ("item 1", "item 2", "item 3"),
+  "Install:": ("Inst 1", "Inst 2", "Inst 3"),
+)
+
+#table(
+  columns: 2,
+  column-gutter: 25%,
+  inset: (x: 0pt, y: 2pt),
+  stroke: none,
+  table.header(
+    [*All rooms for pricing*],
+    [*Price*]
+  ),
+  table.hline(),
+  for (name, items) in testData {
+    [
+      *#name*
+      #if type(items) == array {
+          for item in items {
+              list(indent: 1em, item)
+          }
+      }
+    ]
+  },[\$10,000]
+)*/
+
+#show list: set block(spacing: 0.5em)
+
+/*#let tableData = (
+  "Product:": (items: ("Item 1", "Item 2", "Item 3"), price: "100.50"),
+  "Install:": (items: ("Item 4", "Item 5")),
+  "Service:": (items: ("Item 6", "Item 7", "Item 8"), price: "500.00"),
+)*/
+
+#context {
+  let total = ()
+  
+  for (k,v) in invest-state.get() {
+    if v.at("price", default: 0) != 0 {
+      total.push(decimal(v.at("price")))
+    }
+  }
+
+  line(length: 100%)
+  v(-0.75em)
+  table(
+    columns: (1fr, auto),
+    row-gutter: 0.25em,
+    align: (left, right),
+    inset: (y: 10%),
+    stroke: none,
+    // Table Header
+    [*Section / Items*],[*Price*],
+    [],[],
+    table.hline(),
+    // Iterate over sections and render dynamically
+    ..for (section, data) in invest-state.get() {
+      ([*#section*
+      #for item in data.at("items") {
+        text(size: 12pt)[#list(indent: 1em, item)]
+      }], table.hline(),
+      if data.at("price", default: 0) != 0 {
+        [#format_dollars(decimal(data.at("price")))]
+      } else {
+        [-]
+      }
+    )},
+    [],[],
+    [],[],
+    [*Total Price* #text(size: 12pt)[_\*State Sales Tax, if applicable, is not included\*_]],[*#format_dollars(total.sum(default: 0))*]
+  )
+}
+#pagebreak()
