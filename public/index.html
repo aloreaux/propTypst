@@ -81,6 +81,9 @@
     <h2>Investment</h2>
     <div id="investment-section" class="section">
       <button type="button" onclick="addInvestSection()">Add Investment Section</button>
+      <div id="investment-container">
+        <!-- Dynamic Investment Constainer for Content-->
+      </div>
     </div>
 
     <button type="submit">Generate PDF</button>
@@ -156,7 +159,7 @@
       section.appendChild(investDiv);
     }*/
 
-    function addInvestSection() {
+    /*function addInvestSection() {
         const section = document.getElementById('investment-section');
         const investDiv = document.createElement('div');
         investDiv.className = 'nested-section invest-section'; // Added 'invest-section' class
@@ -178,8 +181,138 @@
         <button type="button" onclick="this.parentNode.remove()">Remove Item</button>
       `;
       container.appendChild(itemDiv);
+    }*/
+
+    let currentDragElement = null;
+
+    /** ==========================
+     * Add New Investment Section
+     ========================== **/
+    /*function addInvestSection() {
+      const container = document.getElementById('investment-container');
+      const investDiv = document.createElement('div');
+      investDiv.className = 'nested-section invest-section';
+      investDiv.setAttribute('draggable', true); // Enable drag-and-drop
+      investDiv.innerHTML = `
+        <label>Section Name: <input type="text" name="investSectionName" required /></label>
+        <div class="invest-items"></div>
+        <button type="button" onclick="addInvestItem(this)">Add Item</button>
+        <label>Price: <input type="text" name="investPrice" /></label>
+        <button type="button" onclick="this.parentNode.remove()">Remove Section</button>
+      `;
+
+      // Add drag-and-drop event listeners
+      investDiv.addEventListener('dragstart', (e) => {
+        currentDragElement = investDiv;
+        investDiv.style.opacity = '0.5'; // Highlight dragging
+      });
+
+      investDiv.addEventListener('dragend', () => {
+        currentDragElement.style.opacity = '1'; // Remove highlight
+        currentDragElement = null;
+      });
+
+      investDiv.addEventListener('dragover', (e) => {
+        e.preventDefault(); // Allow dropping
+        const target = e.target.closest('.invest-section');
+        if (target && target !== currentDragElement) {
+          container.insertBefore(currentDragElement, target.nextSibling);
+        }
+      });
+
+      container.appendChild(investDiv);
+    }*/
+
+    /** ==========================
+   * Add New Investment Section
+   ========================== **/
+  function addInvestSection(name = "", items = [], price = "") {
+    const container = document.getElementById("investment-container");
+    if (!container) {
+      console.error("Investment container not found!");
+      return;
     }
 
+    const investDiv = document.createElement("div");
+    investDiv.className = "nested-section invest-section";
+    investDiv.setAttribute("draggable", true); // Enable drag-and-drop
+    investDiv.innerHTML = `
+      <label>Section Name: <input type="text" name="investSectionName" value="${name}" required /></label>
+      <div class="invest-items">
+        ${items
+          .map(
+            (item) => `
+          <div>
+            <label>Item: <input type="text" name="investItem" value="${item}" required /></label>
+            <button type="button" onclick="this.parentNode.remove()">Remove Item</button>
+          </div>
+        `
+          )
+          .join("")}
+      </div>
+      <button type="button" onclick="addInvestItem(this)">Add Item</button>
+      <label>Price: <input type="text" name="investPrice" value="${price}" /></label>
+      ${name !== "Freight" ? '<button type="button" onclick="this.parentNode.remove()">Remove Section</button>' : ""}
+    `;
+
+  investDiv.addEventListener("dragstart", (e) => {
+    currentDragElement = investDiv;
+    investDiv.style.opacity = "0.5"; // Highlight dragging
+  });
+
+  investDiv.addEventListener("dragend", () => {
+    currentDragElement.style.opacity = "1"; // Remove highlight
+    currentDragElement = null;
+  });
+
+  investDiv.addEventListener("dragover", (e) => {
+    e.preventDefault(); // Allow dropping
+    const container = document.getElementById("investment-container");
+    const target = e.target.closest(".invest-section");
+
+    if (target && target !== currentDragElement) {
+      // Insert before the valid target
+      container.insertBefore(currentDragElement, target);
+    } else if (!target) {
+      // If no target, move to the top of the container
+      container.insertBefore(currentDragElement, container.firstChild);
+    }
+  });
+
+    container.appendChild(investDiv);
+  }
+
+  /** ==========================
+   * Add New Item to Investment Section
+   ========================== **/
+  function addInvestItem(button) {
+    const container = button.previousElementSibling;
+    const itemDiv = document.createElement("div");
+    itemDiv.innerHTML = `
+      <label>Item: <input type="text" name="investItem" required /></label>
+      <button type="button" onclick="this.parentNode.remove()">Remove Item</button>
+    `;
+    container.appendChild(itemDiv);
+  }
+
+    /** ==========================
+     * Add New Item to Investment Section
+     ========================== **/
+    function addInvestItem(button) {
+      const container = button.previousElementSibling;
+      const itemDiv = document.createElement('div');
+      itemDiv.innerHTML = `
+        <label>Item: <input type="text" name="investItem" required /></label>
+        <button type="button" onclick="this.parentNode.remove()">Remove Item</button>
+      `;
+      container.appendChild(itemDiv);
+    }
+
+
+  document.addEventListener("DOMContentLoaded", () => {
+  // Add default "Freight" section
+    addInvestSection("Freight", ["SHIPPER PREPAYS FREIGHT – ADDS TO CUSTOMER INVOICE", "Due to volatility in freight charges, the shipping cost provided on this quote is an ESTIMATE only. Freight costs and the number of truckloads may change. The actual freight cost will be charged at the time of shipment OR on the final invoice."], ""); // Predefined items and empty price
+  });
     /** ==========================
  * Form Submission
  ========================== **/
@@ -204,7 +337,7 @@ document.getElementById('pdf-form').addEventListener('submit', async (e) => {
     summaryBool: formData.has('summaryBool'),
     imgpath: formData.get('imgpath'),
     equip: {},
-    summary: { objective: formData.get('summaryObjective'), solutions: [] },
+    summary: { Objective: formData.get('summaryObjective'), Solutions: [] },
     invest: {}
   };
 
@@ -232,7 +365,7 @@ document.getElementById('pdf-form').addEventListener('submit', async (e) => {
   document.querySelectorAll('[name="summarySolution"]').forEach((input) => {
     const solution = input.value.trim();
     if (solution) {
-      data.summary.solutions.push(solution);
+      data.summary.Solutions.push(solution);
     }
   });
 

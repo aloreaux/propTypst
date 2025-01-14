@@ -103,16 +103,14 @@ IN NO EVENT SHALL EITHER PARTY BE LIABLE TO THE OTHER PARTY FOR INDIRECT, CONSEQ
   v(1em)
   table(
     columns: (2fr, 0.5fr, 1fr),
-    row-gutter: 0.2em,
+    //row-gutter: 0.2em,
     align: (left, center, right),
-    inset: (y: 10%),
+    inset: (y: 0.5em),
     stroke: none,
     [*Service Agreement for #title-state.get()*],[*Quantity*],[*Price*],
     table.hline(),
-    [],[],[],
     [Cost Per Carriage],[#quantity-state.get()],[#format_dollars(decimal(carriageCost.get()))],
     table.hline(),
-    [],[],[],
     table.cell(colspan: 2)[*Total Price:* #text(size: 12pt)[_\* State sales tax, if applicable, is not included_]],[*#format_dollars((decimal(quantity-state.get())*decimal(carriageCost.get())))*],
   )
 

@@ -48,17 +48,16 @@
     }
   }
 
-  line(length: 100%)
-  v(-0.75em)
+  //line(length: 100%)
+  //v(-0.9em)
   table(
     columns: (1fr, auto),
-    row-gutter: 0.25em,
+    //gutter: 0.5em,
     align: (left, right),
-    inset: (y: 10%),
+    inset: (y: 0.5em),
     stroke: none,
     // Table Header
-    [*Section / Items*],[*Price*],
-    [],[],
+    table.header([*Section / Items*],[*Price*],),
     table.hline(),
     // Iterate over sections and render dynamically
     ..for (section, data) in invest-state.get() {
@@ -69,12 +68,11 @@
       if data.at("price", default: 0) != 0 {
         [#format_dollars(decimal(data.at("price")))]
       } else {
-        [-]
+        []
       }
     )},
-    [],[],
-    [],[],
-    [*Total Price* #text(size: 12pt)[_\*State Sales Tax, if applicable, is not included\*_]],[*#format_dollars(total.sum(default: 0))*]
+    table.hline(),
+    table.footer([*Total Price* #text(size: 12pt)[_\*State Sales Tax, if applicable, is not included\*_]],[*#format_dollars(total.sum(default: 0))*],)
   )
 }
 #pagebreak()
