@@ -61,7 +61,7 @@ app.use(express.static("public"));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-const docDefaults = { 
+const docDefaults = {
     corporate: true,
     quote: true,
     title: "New Web App",
@@ -70,15 +70,15 @@ const docDefaults = {
 };
 
 const cornerImgPath = {
-    "assets/business.jpg" : "assets/biz.svg",
-    "assets/grow.jpg" : "assets/grow.svg",
-    "assets/edu.jpg" : "assets/edu.svg",
+    "assets/business.jpg": "assets/biz.svg",
+    "assets/grow.jpg": "assets/grow.svg",
+    "assets/edu.jpg": "assets/edu.svg",
 };
 
 const equipSpec = {
-    "Room 1": ["Item 1","Item 2","Item 3"], 
-    "Room 2": ["Item 4","Item 5","Item 6"], 
-    "Room 3": ["Item 7",] 
+    "Room 1": ["Item 1", "Item 2", "Item 3"],
+    "Room 2": ["Item 4", "Item 5", "Item 6"],
+    "Room 3": ["Item 7",]
 };
 
 const sumSpec = {
@@ -87,9 +87,9 @@ const sumSpec = {
 }
 
 const investSpec = {
-    "Product": {items: ["item 1", "item 2", "item 3"], price: 336258},
-    "Install": {items: ["item 1", "item 3"], price: 74260.95},
-    "Freight": {items: ["item 1", "item 2", "item 3"], price: 39625}
+    "Product": { items: ["item 1", "item 2", "item 3"], price: 336258 },
+    "Install": { items: ["item 1", "item 3"], price: 74260.95 },
+    "Freight": { items: ["item 1", "item 2", "item 3"], price: 39625 }
 }
 
 /*// Route to process the form and generate a PDF
@@ -221,7 +221,7 @@ app.post("/generate-pdf", (req, res) => {
         } else {
             docForm.equip = "()";
         }
-       //docForm.equip = convertJsonToTypstDict(equipSpec)
+        //docForm.equip = convertJsonToTypstDict(equipSpec)
 
         if (req.body.summary) {
             docForm.summary = convertJsonToTypstDict(req.body.summary);
@@ -255,53 +255,73 @@ app.post("/generate-pdf", (req, res) => {
     }
 });
 
-async function generatePDF(docform) {
-  try {
-    // Step 1: Load the Typst template
-    const templatePath = path.resolve(__dirname, "doc.typ");
-    let template = fs.readFileSync(templatePath, "utf-8");   
+app.post("/generate-json", (req, res) => {
+    const formData = req.body;
 
-    // Step 2: Replace the placeholder with dynamic data
-    for(const [key, value] of Object.entries(docform)) {
-        const placeholder = '$' + key + '$';
-        if(typeof value === 'boolean') {
-            template = template.replace(placeholder, value);
-        }
-        else if(typeof value === 'string'){
-            if(isTypstDictionaryString(value)) {
-                template = template.replace(placeholder, removeOuterQuotesIfWrapped(value))
-            } else {
-                template = template.replace(placeholder, '"'+value+'"');
-            }
-        }
-        else {
-            template = template.replace(placeholder, value);
-        }
-    }
+    try {
+        // Save JSON to a file
+        const jsonPath = path.resolve(__dirname, "form-data.json");
+        fs.writeFileSync(jsonPath, JSON.stringify(formData, null, 2));
 
-    // Step 3: Save the modified template to a temporary file
-    const filledTemplatePath = path.resolve(__dirname, "filled.typ");
-    fs.writeFileSync(filledTemplatePath, template);
-
-    // Step 4: Define the output PDF file path
-    const outputPdfPath = path.resolve(__dirname, "output.pdf");
-
-    // Step 5: Compile the Typst template using a child process
-    const command = `typst compile ${filledTemplatePath} ${outputPdfPath}`;
-    await new Promise((resolve, reject) => {
-        exec(command, (error, stdout, stderr) => {
-            if (error) {
-                console.error("Error generating PDF:", stderr);
-                reject(stderr);
-            } else {
-                console.log("PDF generated successfully:", stdout);
-                resolve();
-            }
+        // Send JSON file to client
+        res.set({
+            "Content-Type": "application/json",
+            "Content-Disposition": 'attachment; filename="form-data.json"',
         });
-    });
-  } catch (err) {
-    console.error("An error occurred:", err);
-  }
+        res.sendFile(jsonPath);
+    } catch (err) {
+        console.error("Error generating JSON:", err);
+        res.status(500).send("Failed to generate JSON.");
+    }
+});
+
+async function generatePDF(docform) {
+    try {
+        // Step 1: Load the Typst template
+        const templatePath = path.resolve(__dirname, "doc.typ");
+        let template = fs.readFileSync(templatePath, "utf-8");
+
+        // Step 2: Replace the placeholder with dynamic data
+        for (const [key, value] of Object.entries(docform)) {
+            const placeholder = '$' + key + '$';
+            if (typeof value === 'boolean') {
+                template = template.replace(placeholder, value);
+            }
+            else if (typeof value === 'string') {
+                if (isTypstDictionaryString(value)) {
+                    template = template.replace(placeholder, removeOuterQuotesIfWrapped(value))
+                } else {
+                    template = template.replace(placeholder, '"' + value + '"');
+                }
+            }
+            else {
+                template = template.replace(placeholder, value);
+            }
+        }
+
+        // Step 3: Save the modified template to a temporary file
+        const filledTemplatePath = path.resolve(__dirname, "filled.typ");
+        fs.writeFileSync(filledTemplatePath, template);
+
+        // Step 4: Define the output PDF file path
+        const outputPdfPath = path.resolve(__dirname, "output.pdf");
+
+        // Step 5: Compile the Typst template using a child process
+        const command = `typst compile ${filledTemplatePath} ${outputPdfPath}`;
+        await new Promise((resolve, reject) => {
+            exec(command, (error, stdout, stderr) => {
+                if (error) {
+                    console.error("Error generating PDF:", stderr);
+                    reject(stderr);
+                } else {
+                    console.log("PDF generated successfully:", stdout);
+                    resolve();
+                }
+            });
+        });
+    } catch (err) {
+        console.error("An error occurred:", err);
+    }
 }
 
 /*function jsObjectToTypstDictionary(obj) {
@@ -333,8 +353,8 @@ async function generatePDF(docform) {
 function removeOuterQuotesIfWrapped(str) {
     const regex = /^"\(.*\)"$/; // Matches strings with outer quotes and parentheses inside
     if (regex.test(str)) {
-      // Remove the first and last characters (the outer quotes)
-      return str.slice(1, -1);
+        // Remove the first and last characters (the outer quotes)
+        return str.slice(1, -1);
     }
     return str; // Return the original string if the condition is not met
 }
@@ -355,19 +375,19 @@ function convertJsonToTypstDict(jsonObject) {
             } else {
                 return `(${value.map(formatValue).join(", ")})`;
             }
-        } 
+        }
         else if (typeof value === "string") {
             // Wrap strings in double quotes
             return `"${value}"`;
-        } 
+        }
         else if (typeof value === "number") {
             // Keep numbers as-is
             return `"${value}"`;
-        } 
+        }
         else if (typeof value === "boolean") {
             // Convert booleans to true/false strings
             return value ? "true" : "false";
-        } 
+        }
         else if (typeof value === "object" && value !== null) {
             // Handle nested objects
             let nestedDict = "(";
@@ -375,11 +395,11 @@ function convertJsonToTypstDict(jsonObject) {
                 nestedDict += `${nestedKey}: ${formatValue(nestedValue)}, `;
             }
             return nestedDict.slice(0, -2) + ")";
-        } 
+        }
         else if (value === null || value === undefined) {
             // Handle null or undefined explicitly
             return `""`;
-        } 
+        }
         else {
             throw new Error(`Unsupported value type in JSON: ${typeof value} | Value: ${value}`);
         }
@@ -472,5 +492,5 @@ function convertJsonToTypstDict(jsonObject) {
 // Start the server
 const PORT = 3000;
 app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+    console.log(`Server running at http://localhost:${PORT}`);
 });
