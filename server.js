@@ -53,8 +53,9 @@ app.listen(PORT, () => {
 const express = require("express");
 const bodyParser = require("body-parser");
 const { exec } = require("child_process");
-const fs = require("fs");
+const fs = require("fs/promises");
 const path = require("path");
+const { v4: uuidv4 } = require("uuid");
 
 const app = express();
 app.use(express.static("public"));
@@ -75,23 +76,12 @@ const cornerImgPath = {
     "assets/edu.jpg": "assets/edu.svg",
 };
 
-const equipSpec = {
-    "Room 1": ["Item 1", "Item 2", "Item 3"],
-    "Room 2": ["Item 4", "Item 5", "Item 6"],
-    "Room 3": ["Item 7",]
-};
-
-const sumSpec = {
-    "Objective": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim aeque doleamus animo, cum corpore dolemus, fieri tamen permagna accessio potest, si aliquod aeternum et infinitum impendere malum nobis opinemur. Quod idem licet transferre in voluptatem, ut postea variari voluptas distinguique possit, augeri amplificarique non possit.",
-    "Solution": ["Sol 1", "Sol 2", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim aeque doleamus animo, cum corpore dolemus, fieri tamen permagna accessio potest, si aliquod aeternum et infinitum impendere malum nobis opinemur."]
+// Helper to generate session-specific file paths
+function getSessionFilePath(sessionId, name, extension) {
+    //return path.join(os.tmpdir(), `${sessionId}${name}.${extension}`);
+    const tmpDir = path.resolve(__dirname, "tmp");
+    return path.join(tmpDir, `${sessionId}${name}.${extension}`);
 }
-
-const investSpec = {
-    "Product": { items: ["item 1", "item 2", "item 3"], price: 336258 },
-    "Install": { items: ["item 1", "item 3"], price: 74260.95 },
-    "Freight": { items: ["item 1", "item 2", "item 3"], price: 39625 }
-}
-
 /*// Route to process the form and generate a PDF
 app.post("/generate-pdf", (req, res) => {
     const docForm = { ...req.body };
@@ -204,51 +194,110 @@ app.post("/generate-pdf", (req, res) => {
     }
 });*/
 
-app.post("/generate-pdf", (req, res) => {
-    try {
-        const docForm = { ...docDefaults, ...req.body };
+app.post("/generate-pdf", async (req, res) => {
+    const sessionId = uuidv4(); // Use `userId` from the form or create a new one
+    const filledTemplatePath = getSessionFilePath(sessionId, "filled", "typ");
+    const outputPdfPath = getSessionFilePath(sessionId, "output", "pdf");
+    const docForm = { ...docDefaults, ...req.body };
+    const appRoot = process.cwd();
 
-        // Boolean conversion
-        docForm.quote = !!docForm.quote;
-        docForm.summaryBool = !!docForm.summaryBool;
+    // Boolean conversion
+    docForm.quote = !!docForm.quote;
+    docForm.summaryBool = !!docForm.summaryBool;
 
-        // Handle image paths
-        docForm.cornerimg = cornerImgPath[docForm.imgpath] || "assets/default.svg";
+    // Handle image paths
+    docForm.cornerimg = cornerImgPath[docForm.imgpath] || "assets/default.svg";
 
-        // Handle dynamic sections
-        if (req.body.equip && Object.keys(req.body.equip).length > 0) {
-            docForm.equip = convertJsonToTypstDict(req.body.equip);
-        } else {
-            docForm.equip = "()";
-        }
-        //docForm.equip = convertJsonToTypstDict(equipSpec)
+    // Handle dynamic sections
+    if (req.body.equip && Object.keys(req.body.equip).length > 0) {
+        docForm.equip = convertJsonToTypstDict(req.body.equip);
+    } else {
+        docForm.equip = "()";
+    }
+    //docForm.equip = convertJsonToTypstDict(equipSpec)
 
-        if (req.body.summary) {
-            docForm.summary = convertJsonToTypstDict(req.body.summary);
-        } else {
-            docForm.summary = "()";
-        }
+    if (req.body.summary) {
+        docForm.summary = convertJsonToTypstDict(req.body.summary);
+    } else {
+        docForm.summary = "()";
+    }
 
-        if (req.body.invest && Object.keys(req.body.invest).length > 0) {
-            docForm.invest = convertJsonToTypstDict(req.body.invest);
-        } else {
-            docForm.invest = "()";
-        }
+    if (req.body.invest && Object.keys(req.body.invest).length > 0) {
+        docForm.invest = convertJsonToTypstDict(req.body.invest);
+    } else {
+        docForm.invest = "()";
+    }
 
-        console.log("Processed Data:", JSON.stringify(docForm, null, 2));
+    console.log("Processed Data:", JSON.stringify(docForm, null, 2));
 
-        generatePDF(docForm)
-            .then(() => {
-                res.set({
-                    'Content-Type': 'application/pdf',
-                    'Content-Disposition': 'attachment; filename="generated.pdf"'
-                });
-                res.sendFile(path.resolve(__dirname, "output.pdf"));
-            })
-            .catch((err) => {
-                console.error("Error generating PDF:", err);
-                res.status(500).send("Failed to generate PDF.");
+    /*generatePDF(docForm)
+        .then(() => {
+            res.set({
+                'Content-Type': 'application/pdf',
+                'Content-Disposition': 'attachment; filename="generated.pdf"'
             });
+            res.sendFile(path.resolve(__dirname, "output.pdf"));
+        })
+        .catch((err) => {
+            console.error("Error generating PDF:", err);
+            res.status(500).send("Failed to generate PDF.");
+        });*/
+    try {
+        // Load and process the Typst template
+        const templatePath = path.resolve(__dirname, "doc.typ");
+        let template = await fs.readFile(templatePath, "utf8");
+
+        // Replace the placeholder with dynamic data
+        for (const [key, value] of Object.entries(docForm)) {
+            const placeholder = '$' + key + '$';
+            if (typeof value === 'boolean') {
+                template = template.replace(placeholder, value);
+            }
+            else if (typeof value === 'string') {
+                if (isTypstDictionaryString(value)) {
+                    template = template.replace(placeholder, removeOuterQuotesIfWrapped(value))
+                } else {
+                    template = template.replace(placeholder, '"' + value + '"');
+                }
+            }
+            else {
+                template = template.replace(placeholder, value);
+            }
+        }
+
+        // Save the filled Typst template
+        await fs.writeFile(filledTemplatePath, template);
+
+        // Compile the Typst template into a PDF
+        const command = `typst compile --root ${appRoot} ${filledTemplatePath} ${outputPdfPath}`;
+        await new Promise((resolve, reject) => {
+            exec(command, (err, stdout, stderr) => {
+                if (err) {
+                    console.error("Error generating PDF:", stderr);
+                    reject(stderr);
+                } else {
+                    console.log("PDF generated successfully:", stdout);
+                    resolve();
+                }
+            });
+        });
+
+        // Send the PDF as a response
+        res.set({
+            "Content-Type": "application/pdf",
+            "Content-Disposition": 'attachment; filename="generated.pdf"',
+        });
+        res.sendFile(outputPdfPath);
+
+         // Clean up temporary files after a delay
+         setTimeout(async () => {
+            try {
+                await fs.unlink(filledTemplatePath);
+                await fs.unlink(outputPdfPath);
+            } catch (err) {
+                console.warn(`Error cleaning up temp files: ${err.message}`);
+            }
+        }, 60000); // Clean up after 60 seconds
     } catch (err) {
         console.error("Error processing PDF generation:", err);
         res.status(500).send("Failed to process PDF generation.");
@@ -275,7 +324,7 @@ app.post("/generate-json", (req, res) => {
     }
 });
 
-async function generatePDF(docform) {
+/*async function generatePDF(docform) {
     try {
         // Step 1: Load the Typst template
         const templatePath = path.resolve(__dirname, "doc.typ");
@@ -322,7 +371,7 @@ async function generatePDF(docform) {
     } catch (err) {
         console.error("An error occurred:", err);
     }
-}
+}*/
 
 /*function jsObjectToTypstDictionary(obj) {
     const formatValue = (value) => {
