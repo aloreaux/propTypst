@@ -469,7 +469,7 @@ function populateForm(data) {
     // Handle equipment (dynamically create missing rooms and items)
     if (data.equip && Object.keys(data.equip).length > 0) {
         const equipSection = document.getElementById("equipment-section");
-        equipSection.innerHTML = ""; // Clear existing equipment
+        equipSection.innerHTML = `<button type="button" onclick="addEquipSection()">Add Room</button>`; // Clear existing equipment
         Object.entries(data.equip).forEach(([roomName, items]) => {
             const roomDiv = document.createElement("div");
             roomDiv.className = "nested-section equip-room";
