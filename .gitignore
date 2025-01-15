@@ -2,3 +2,4 @@ filled.typ
 node_modules/
 *.pdf
 *.json
+tmp/
