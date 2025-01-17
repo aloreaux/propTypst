@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="8.5514317mm"
+   height="7.9375mm"
+   viewBox="0 0 8.5514317 7.9375"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4 (e7c3feb100, 2024-10-09)"
+   sodipodi:docname="donnnavlogo.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="11.313709"
+     inkscape:cx="33.631766"
+     inkscape:cy="22.185475"
+     inkscape:window-width="2560"
+     inkscape:window-height="1377"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-17.778243,-73.499906)">
+    <path
+       id="rect1"
+       style="fill:#1f4fa2;fill-opacity:1;stroke:none;stroke-width:0.00460365"
+       d="m 17.778243,73.499906 v 3.479267 h 8.551432 C 26.089822,75.013918 24.42559,73.50093 22.393712,73.499961 v -5.5e-5 h -0.0019 z m 0,4.458233 v 3.479267 h 4.613528 0.0019 v -5.5e-5 c 2.031878,-9.69e-4 3.69611,-1.513956 3.935963,-3.479212 z" />
+  </g>
+</svg>

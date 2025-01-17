@@ -1,0 +1,6 @@
+textarea.form-control {
+    /*max-height: 300px; /* Adjust as needed */
+    resize: none;
+    overflow-y: hidden;
+    box-sizing: border-box;
+}
