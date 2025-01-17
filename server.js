@@ -58,6 +58,10 @@ const path = require("path");
 const { v4: uuidv4 } = require("uuid");
 
 const app = express();
+
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "public/views"));
+
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -67,13 +71,18 @@ const docDefaults = {
     quote: true,
     title: "New Web App",
     author: "John Doe",
-    imgpath: "assets/business.jpg",
+    imgpath: "assets/business/business.jpg",
 };
 
 const cornerImgPath = {
-    "assets/business.jpg": "assets/biz.svg",
-    "assets/grow.jpg": "assets/grow.svg",
-    "assets/edu.jpg": "assets/edu.svg",
+    "assets/business/business.jpg": "assets/business/biz.svg",
+    "assets/grow/grow.jpg": "assets/grow/grow.svg",
+    "assets/healthcare/health.jpg": "assets/healthcare/health.svg",
+    "assets/higheredu/edu.jpg": "assets/higheredu/edu.svg",
+    "assets/industrial/industrial.jpg": "assets/industrial/industrial.svg",
+    "assets/military/military.jpg": "assets/military/military.svg",
+    "assets/museum/museum.jpg": "assets/museum/museum.svg",
+    "assets/publicsafety/publicsafety.jpg": "assets/publicsafety/publicsafety.svg",
 };
 
 // Helper to generate session-specific file paths
@@ -194,6 +203,25 @@ app.post("/generate-pdf", (req, res) => {
     }
 });*/
 
+app.get("/", (req, res) => {
+    /*const defaultData = {
+        title: "Sample Title",
+        author: "Sample Author",
+        imgpath: "assets/business.jpg",
+        equip: {
+            Room1: ["Item1", "Item2"],
+        },
+        invest: {
+            Freight: { items: ["Item A", "Item B"], price: "1000" },
+        },
+    };*/
+    res.render("index");
+});
+
+app.get("/form", (req, res) => {
+    res.render("form");
+})
+
 app.post("/generate-pdf", async (req, res) => {
     const sessionId = uuidv4(); // Use `userId` from the form or create a new one
     const filledTemplatePath = getSessionFilePath(sessionId, "filled", "typ");
@@ -282,15 +310,20 @@ app.post("/generate-pdf", async (req, res) => {
             });
         });
 
+        const sanitizedTitle = (docForm.title || "generated")
+            .replace(/[^a-zA-Z0-9-_]/g, "_") // Replace unsafe characters with underscores
+            .substring(0, 50); // Limit length to 50 characters
+        const filename = `${sanitizedTitle}.pdf`;
+
         // Send the PDF as a response
         res.set({
             "Content-Type": "application/pdf",
-            "Content-Disposition": 'attachment; filename="generated.pdf"',
+            "Content-Disposition": `attachment; filename="${filename}"`,
         });
         res.sendFile(outputPdfPath);
 
-         // Clean up temporary files after a delay
-         setTimeout(async () => {
+        // Clean up temporary files after a delay
+        setTimeout(async () => {
             try {
                 await fs.unlink(filledTemplatePath);
                 await fs.unlink(outputPdfPath);
@@ -305,17 +338,22 @@ app.post("/generate-pdf", async (req, res) => {
 });
 
 app.post("/generate-json", (req, res) => {
-    const formData = req.body;
+    const docForm = req.body;
 
     try {
         // Save JSON to a file
         const jsonPath = path.resolve(__dirname, "form-data.json");
-        fs.writeFileSync(jsonPath, JSON.stringify(formData, null, 2));
+        fs.writeFileSync(jsonPath, JSON.stringify(docForm, null, 2));
+
+        const sanitizedTitle = (docForm.title || "generated")
+            .replace(/[^a-zA-Z0-9-_]/g, "_") // Replace unsafe characters with underscores
+            .substring(0, 50); // Limit length to 50 characters
+        const filename = `${sanitizedTitle}.pdf`;
 
         // Send JSON file to client
         res.set({
             "Content-Type": "application/json",
-            "Content-Disposition": 'attachment; filename="form-data.json"',
+            "Content-Disposition": `attachment; filename="${filename}"`,
         });
         res.sendFile(jsonPath);
     } catch (err) {
