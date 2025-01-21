@@ -56,24 +56,30 @@
         }
 
         const investDiv = document.createElement("div");
-        investDiv.className = "nested-section invest-section row";
+        investDiv.className = "card nested-section invest-section mb-2";
         investDiv.setAttribute("draggable", true); // Enable drag-and-drop
         investDiv.innerHTML = `
-        <div class="input-group mb-3 col">
-            <span class="input-group-text">Section Name</span>
-            <input type="text" name="investSectionName" value="${name}" class="form-control" required />
-            <button type="button" class="btn btn-primary" onclick="addInvestItem(this)">Add Item</button>
+        <div class="row p-2">
+            <div class="col-6">
+                <div class="input-group">
+                    <span class="input-group-text">Section Name</span>
+                    <input type="text" name="investSectionName" value="${name}" class="form-control" required />
+                    <button type="button" class="btn btn-primary" onclick="addInvestItem(this)">Add Item</button>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="input-group">
+                    <span class="input-group-text">Price</span><input type="text" name="investPrice" value="${price}" class="form-control" /></label>
+                    <button type="button" class="btn btn-danger" onclick="this.closest('.invest-section').remove()">Remove Section</button>
+                </div>
+            </div>
         </div>
-        <div class="input-group col align-self-start">
-            <span class="input-group-text">Price</span><input type="text" name="investPrice" value="${price}" class="form-control" /></label>
-            <button type="button" class="btn btn-danger" onclick="this.closest('.invest-section').remove()">Remove Section</button>
-        </div>
-        <div class="w-100"></div>
+        <div class="row">
         <div class="invest-items col">
             ${items
                 .map(
                     (item) => `
-                <div class="input-group mb-3">
+                <div class="input-group px-2 pb-2">
                 <span class="input-group-text">Item</span>
                 <textarea class="form-control" rows="1" name="investItem" required>${item}</textarea>
                 <button type="button" class="btn btn-danger" onclick="this.parentNode.remove()"><i class="bi bi-x-square-fill"></i></button>
@@ -82,9 +88,10 @@
                 )
                 .join("")}
         </div>
+        </div>
         `;
 
-        investDiv.addEventListener("dragstart", (e) => {
+        /*investDiv.addEventListener("dragstart", (e) => {
             currentDragElement = investDiv;
             investDiv.style.opacity = "0.5"; // Highlight dragging
         });
@@ -100,15 +107,21 @@
             const target = e.target.closest(".invest-section");
 
             if (target && target !== currentDragElement) {
-                // Insert before the valid target
-                container.insertBefore(currentDragElement, target);
-            } else if (!target) {
-                // If no target, move to the top of the container
-                container.insertBefore(currentDragElement, container.firstChild);
+                const targetRect = target.getBoundingClientRect();
+                const offset = e.clientY - targetRect.top;
+
+                if (offset > targetRect.height / 2) {
+                    // Insert before the valid target
+                    container.insertBefore(currentDragElement, target);
+                } else {
+                    // If no target, move to the top of the container
+                    container.insertBefore(currentDragElement, container.firstChild);
+                }
             }
-        });
+        });*/
 
         container.appendChild(investDiv);
+        initializeDragAndDrop()
     }
 
     /** ==========================
@@ -129,7 +142,7 @@
         }
 
         const itemDiv = document.createElement("div");
-        itemDiv.className = 'input-group mb-3';
+        itemDiv.className = 'input-group px-2 pb-2';
         itemDiv.innerHTML = `
             <span class="input-group-text">Item</span>
             <textarea class="form-control" rows=1 name="investItem" required></textarea>
@@ -447,203 +460,36 @@
             selectDropdown.value = data.imgpath || ""; // Set to saved value or default if not present
         }
     }
-</script>
-<!--<script>
-    document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById("pdf-form");
 
-  /** ==========================
-   * Dynamic Equipment Section
-   ========================== **/
-  function addEquipSection() {
-    const section = document.getElementById("equipment-section");
-    const equipDiv = document.createElement("div");
-    equipDiv.className = "card mt-3 equip-room"; // Bootstrap card
-    equipDiv.innerHTML = `
-      <div class="card-body">
-        <h5 class="card-title">New Room</h5>
-        <div class="mb-3">
-          <label class="form-label">Room Name:
-            <input type="text" name="equipRoomName" class="form-control" placeholder="Room Name" required />
-          </label>
-        </div>
-        <div class="equip-items"></div>
-        <button type="button" class="btn btn-primary btn-sm me-2" onclick="addEquipItem(this)">Add Item</button>
-        <button type="button" class="btn btn-danger btn-sm" onclick="this.closest('.equip-room').remove()">Remove Room</button>
-      </div>
-    `;
-    section.appendChild(equipDiv);
-  }
+    function initializeDragAndDrop() {
+        const sections = document.querySelectorAll(".invest-section");
+        sections.forEach((section) => {
+            section.addEventListener("dragstart", () => {
+                currentDragElement = section;
+                section.style.opacity = "0.5";
+            });
 
-  function addEquipItem(button) {
-    const container = button.previousElementSibling;
-    const itemDiv = document.createElement("div");
-    itemDiv.className = "mb-3";
-    itemDiv.innerHTML = `
-      <label class="form-label">Item:
-        <input type="text" name="equipItem" class="form-control" required />
-      </label>
-      <button type="button" class="btn btn-danger btn-sm mt-1" onclick="this.parentNode.remove()">Remove Item</button>
-    `;
-    container.appendChild(itemDiv);
-  }
+            section.addEventListener("dragend", () => {
+                section.style.opacity = "1";
+                currentDragElement = null;
+            });
 
-  /** ==========================
-   * Dynamic Summary Section
-   ========================== **/
-  function addSummarySolution() {
-    const container = document.getElementById("summary-solutions");
-    const solutionDiv = document.createElement("div");
-    solutionDiv.className = "mb-3";
-    solutionDiv.innerHTML = `
-      <label class="form-label">Solution:
-        <input type="text" name="summarySolution" class="form-control" required />
-      </label>
-      <button type="button" class="btn btn-danger btn-sm mt-1" onclick="this.parentNode.remove()">Remove Solution</button>
-    `;
-    container.appendChild(solutionDiv);
-  }
+            section.addEventListener("dragover", (e) => {
+                e.preventDefault();
+                const container = document.getElementById("investment-container");
+                const target = e.target.closest(".invest-section");
 
-  /** ==========================
-   * Dynamic Investment Section
-   ========================== **/
-  function addInvestSection(name = "", items = [], price = "") {
-    const container = document.getElementById("investment-container");
-    const investDiv = document.createElement("div");
-    investDiv.className = "card mt-3 invest-section";
-    investDiv.innerHTML = `
-      <div class="card-body">
-        <h5 class="card-title">Investment Section</h5>
-        <div class="mb-3">
-          <label class="form-label">Section Name:
-            <input type="text" name="investSectionName" class="form-control" value="${name}" required />
-          </label>
-        </div>
-        <div class="invest-items">
-          ${items
-            .map(
-              (item) => `
-              <div class="mb-3">
-                <label class="form-label">Item:
-                  <input type="text" name="investItem" class="form-control" value="${item}" required />
-                </label>
-                <button type="button" class="btn btn-danger btn-sm mt-1" onclick="this.parentNode.remove()">Remove Item</button>
-              </div>`
-            )
-            .join("")}
-        </div>
-        <button type="button" class="btn btn-primary btn-sm me-2" onclick="addInvestItem(this)">Add Item</button>
-        <div class="mb-3">
-          <label class="form-label">Price:
-            <input type="text" name="investPrice" class="form-control" value="${price}" />
-          </label>
-        </div>
-        ${name !== "Freight" ? '<button type="button" class="btn btn-danger btn-sm" onclick="this.closest(\'.invest-section\').remove()">Remove Section</button>' : ""}
-      </div>
-    `;
-    container.appendChild(investDiv);
-  }
+                if (target && target !== currentDragElement) {
+                    const targetRect = target.getBoundingClientRect();
+                    const offset = e.clientY - targetRect.top;
 
-  function addInvestItem(button) {
-    const container = button.previousElementSibling;
-    const itemDiv = document.createElement("div");
-    itemDiv.className = "mb-3";
-    itemDiv.innerHTML = `
-      <label class="form-label">Item:
-        <input type="text" name="investItem" class="form-control" required />
-      </label>
-      <button type="button" class="btn btn-danger btn-sm mt-1" onclick="this.parentNode.remove()">Remove Item</button>
-    `;
-    container.appendChild(itemDiv);
-  }
-
-  /** ==========================
-   * Form Data Handling
-   ========================== **/
-  function processDynamicSections(data) {
-    // Equipment
-    const equipSections = document.querySelectorAll(".equip-room");
-    equipSections.forEach((section) => {
-      const roomName = section.querySelector('[name="equipRoomName"]').value.trim();
-      if (roomName) {
-        const items = Array.from(section.querySelectorAll('[name="equipItem"]')).map((item) => item.value.trim());
-        if (items.length) data.equip[roomName] = items;
-      }
-    });
-
-    // Summary
-    document.querySelectorAll('[name="summarySolution"]').forEach((input) => {
-      const solution = input.value.trim();
-      if (solution) data.summary.Solutions.push(solution);
-    });
-
-    // Investment
-    const investSections = document.querySelectorAll(".invest-section");
-    investSections.forEach((section) => {
-      const sectionName = section.querySelector('[name="investSectionName"]').value.trim();
-      if (sectionName) {
-        const items = Array.from(section.querySelectorAll('[name="investItem"]')).map((item) => item.value.trim());
-        const price = section.querySelector('[name="investPrice"]').value.trim();
-        if (items.length || price) data.invest[sectionName] = { items, ...(price ? { price } : {}) };
-      }
-    });
-  }
-
-  /** ==========================
-   * Generate JSON
-   ========================== **/
-  document.getElementById("generate-json").addEventListener("click", () => {
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData.entries());
-    data.equip = {};
-    data.summary = { Objectives: formData.get("summaryObjective"), Solutions: [] };
-    data.invest = {};
-    processDynamicSections(data);
-
-    const jsonBlob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(jsonBlob);
-    link.download = `${(data.title || "generated").replace(/[^a-zA-Z0-9-_]/g, "_").substring(0, 50)}.json`;
-    link.click();
-  });
-
-  /** ==========================
-   * Generate PDF
-   ========================== **/
-  document.getElementById("generate-pdf").addEventListener("click", async () => {
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData.entries());
-    data.equip = {};
-    data.summary = { Objectives: formData.get("summaryObjective"), Solutions: [] };
-    data.invest = {};
-    processDynamicSections(data);
-
-    try {
-      const response = await fetch("/generate-pdf", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      if (response.ok) {
-        const blob = await response.blob();
-        const pdfUrl = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = pdfUrl;
-        a.download = `${(data.title || "generated").replace(/[^a-zA-Z0-9-_]/g, "_").substring(0, 50)}.pdf`;
-        a.click();
-        URL.revokeObjectURL(pdfUrl);
-      } else {
-        console.error("PDF generation failed", await response.text());
-      }
-    } catch (error) {
-      console.error("Error generating PDF", error);
+                    if (offset > targetRect.height / 2) {
+                        container.insertBefore(currentDragElement, target.nextSibling);
+                    } else {
+                        container.insertBefore(currentDragElement, target);
+                    }
+                }
+            });
+        });
     }
-  });
-
-  // Add default "Freight" section
-  //addInvestSection("Freight", ["Default Freight Note"], "");
-  addInvestSection("Freight", ["SHIPPER PREPAYS FREIGHT – ADDS TO CUSTOMER INVOICE", "Due to volatility in freight charges, the shipping cost provided on this quote is an ESTIMATE only. Freight costs and the number of truckloads may change. The actual freight cost will be charged at the time of shipment OR on the final invoice."], "");
-});
-
-</script>-->
+</script>
