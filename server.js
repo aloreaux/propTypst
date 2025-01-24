@@ -230,8 +230,15 @@ app.post("/generate-pdf", async (req, res) => {
     const appRoot = process.cwd();
 
     // Boolean conversion
-    docForm.quote = !!docForm.quote;
+    docForm.quoteBool = !!docForm.quoteBool;
     docForm.summaryBool = !!docForm.summaryBool;
+    docForm.lumpBool = !!docForm.lumpBool;
+    docForm.off52 = !!docForm.off52;
+    docForm.fac126 = !!docForm.fac126;
+    docForm.gsa71 = !!docForm.gsa71;
+    docForm.gsa84 = !!docForm.gsa84;
+    docForm.mhec = !!docForm.mhec;
+    docForm.ny = !!docForm.ny;
 
     // Handle image paths
     docForm.cornerimg = cornerImgPath[docForm.imgpath] || "assets/default.svg";
