@@ -121,7 +121,12 @@
         });*/
 
         container.appendChild(investDiv);
-        initializeDragAndDrop()
+        initializeDragAndDrop();
+        // Find all price inputs
+        const priceInputs = document.querySelectorAll('input[name="investPrice"]');
+
+        // Attach comma formatting to each price input
+        priceInputs.forEach(attachCommaFormatting);
     }
 
     /** ==========================
@@ -171,20 +176,28 @@
             // Resize on page load to fit pre-filled content
             resizeTextarea(textarea);
         });
+
+        // Reinitialize comma formatting for dynamically added price inputs
+        document.getElementById("investment-container").addEventListener("DOMNodeInserted", (e) => {
+            if (e.target.tagName === "INPUT" && e.target.name === "investPrice") {
+                numberWithCommas(e.target);
+            }
+        });
     });
 
     /** Generate JSON */
     document.getElementById("generate-json").addEventListener("click", (e) => {
         e.preventDefault();
-        const formData = new FormData(form);
+        const data = prepareFormData(form);
+        //const formData = new FormData(form);
 
         // Filter out certain fields
-        const filteredData = Array.from(formData.entries()).filter(([key, value]) => {
+        /*const filteredData = Array.from(formData.entries()).filter(([key, value]) => {
             // Exclude fields with specific names
             return !['investSectionName', 'investItem', 'investPrice'].includes(key);
-        });
+        });*/
 
-        const data = Object.fromEntries(filteredData);
+        /*const data = Object.fromEntries(filteredData);
 
         data.equip = {};
         data.summary = { Objectives: formData.get('summaryObjective'), Solutions: [] };
@@ -192,7 +205,7 @@
 
         /** ==========================
          * Process Equipment Section (Dynamic)
-         ========================== **/
+         ========================== **
         const equipSections = document.querySelectorAll('.equip-room');
         equipSections.forEach((section) => {
             const roomName = section.querySelector('[name="equipRoomName"]').value.trim();
@@ -210,7 +223,7 @@
 
         /** ==========================
          * Process Summary Section
-         ========================== **/
+         ========================== **
         document.querySelectorAll('[name="summarySolution"]').forEach((input) => {
             const solution = input.value.trim();
             if (solution) {
@@ -220,7 +233,7 @@
 
         /** ==========================
          * Process Investment Section (Dynamic)
-         ========================== **/
+         ========================== **
         const investSections = document.querySelectorAll('.invest-section');
         investSections.forEach((section) => {
             const sectionName = section.querySelector('[name="investSectionName"]').value.trim();
@@ -241,7 +254,7 @@
                     };
                 }
             }
-        });
+        });*/
 
         const jsonBlob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
 
@@ -256,15 +269,16 @@
     ========================== **/
     document.getElementById('generate-pdf').addEventListener("click", async (e) => {
         e.preventDefault();
-        const formData = new FormData(form);
+        //const formData = new FormData(form);
 
         // Filter out certain fields
-        const filteredData = Array.from(formData.entries()).filter(([key, value]) => {
+        /*const filteredData = Array.from(formData.entries()).filter(([key, value]) => {
             // Exclude fields with specific names
             return !['investSectionName', 'investItem', 'investPrice'].includes(key);
-        });
+        });*/
 
-        const data = Object.fromEntries(filteredData);
+        const data = prepareFormData(form);
+        /*const data = Object.fromEntries(filteredData);
 
         data.equip = {};
         data.summary = { Objectives: formData.get('summaryObjective'), Solutions: [] };
@@ -272,7 +286,7 @@
 
         /** ==========================
          * Process Equipment Section (Dynamic)
-         ========================== **/
+         ========================== **
         const equipSections = document.querySelectorAll('.equip-room');
         equipSections.forEach((section) => {
             const roomName = section.querySelector('[name="equipRoomName"]').value.trim();
@@ -290,7 +304,7 @@
 
         /** ==========================
          * Process Summary Section
-         ========================== **/
+         ========================== **
         document.querySelectorAll('[name="summarySolution"]').forEach((input) => {
             const solution = input.value.trim();
             if (solution) {
@@ -300,7 +314,7 @@
 
         /** ==========================
          * Process Investment Section (Dynamic)
-         ========================== **/
+         ========================== **
         const investSections = document.querySelectorAll('.invest-section');
         investSections.forEach((section) => {
             const sectionName = section.querySelector('[name="investSectionName"]').value.trim();
@@ -321,7 +335,7 @@
                     };
                 }
             }
-        });
+        });*/
 
         console.log('Final Data Before Sending:', JSON.stringify(data, null, 2));
 
@@ -492,4 +506,105 @@
             });
         });
     }
+    function addCommas(x) {
+        return x.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+    }
+    // Event listener to format price inputs with commas as the user types
+    function attachCommaFormatting(input) {
+        input.addEventListener("input", (e) => {
+            const cursorPosition = input.selectionStart;
+            const originalValue = input.value;
+            const rawValue = removeCommas(originalValue);
+            const formattedValue = addCommas(rawValue);
+
+            input.value = formattedValue;
+
+            // Adjust cursor position
+            const newPosition = cursorPosition + (formattedValue.length - originalValue.length);
+            input.setSelectionRange(newPosition, newPosition);
+        });
+    }
+    // Helper function to remove commas from a number string
+    function removeCommas(value) {
+        return value.replace(/,/g, "");
+    }
+    /** ==========================
+     * Utility Function: Prepare Form Data
+     ========================== **/
+    function prepareFormData(form) {
+        const formData = new FormData(form);
+        // Filter out certain fields
+        const filteredData = Array.from(formData.entries()).filter(([key, value]) => {
+            // Exclude fields with specific names
+            return !['investSectionName', 'investItem', 'investPrice'].includes(key);
+        });
+        const data = Object.fromEntries(filteredData);
+
+        // Process numeric fields to remove commas for backend submission
+        const numericFields = form.querySelectorAll('input[name="investPrice"]');
+        numericFields.forEach((field) => {
+            const rawValue = removeCommas(field.value);
+            data[field.name] = rawValue; // Update data for submission
+        });
+
+        // Include dynamic sections (Equipment, Summary, Investment)
+        data.equip = {};
+        data.summary = { Objectives: formData.get('summaryObjective'), Solutions: [] };
+        data.invest = {};
+
+        // Process Equipment Section
+        const equipSections = document.querySelectorAll('.equip-room');
+        equipSections.forEach((section) => {
+            const roomName = section.querySelector('[name="equipRoomName"]').value.trim();
+            if (roomName) {
+                const items = Array.from(section.querySelectorAll('[name="equipItem"]'))
+                    .map((item) => item.value.trim())
+                    .filter((item) => item);
+                if (items.length > 0) {
+                    data.equip[roomName] = items;
+                }
+            }
+        });
+
+        // Process Summary Section
+        document.querySelectorAll('[name="summarySolution"]').forEach((input) => {
+            const solution = input.value.trim();
+            if (solution) {
+                data.summary.Solutions.push(solution);
+            }
+        });
+
+        // Process Investment Section
+        const investSections = document.querySelectorAll('.invest-section');
+        investSections.forEach((section) => {
+            const sectionName = section.querySelector('[name="investSectionName"]').value.trim();
+            if (sectionName) {
+                const items = Array.from(section.querySelectorAll('[name="investItem"]'))
+                    .map((item) => item.value.trim())
+                    .filter((item) => item);
+
+                const priceInput = section.querySelector('[name="investPrice"]');
+                const price = priceInput && priceInput.value.trim() ? removeCommas(priceInput.value) : null;
+
+                if (items.length > 0 || price) {
+                    data.invest[sectionName] = {
+                        items: items,
+                        ...(price ? { price } : {}) // Add price only if it's non-empty
+                    };
+                }
+            }
+        });
+
+        return data;
+    }
+    document.addEventListener("click", (event) => {
+        if (event.target.classList.contains("contracts")) {
+            const allContracts = document.querySelectorAll(".contracts");
+            allContracts.forEach((contract) => {
+                if(contract !== event.target) {
+                    contract.checked = false;
+                }
+            });
+        }
+    });
 </script>
