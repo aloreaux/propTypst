@@ -65,14 +65,31 @@
       #for item in data.at("items") {
         text(size: 12pt)[#list(indent: 1em, item)]
       }], table.hline(),
-      if data.at("price", default: 0) != 0 {
-        [#format_dollars(decimal(data.at("price")))]
-      } else {
+      if (lumpSumBool.get()) {
         []
+      } else {
+        if data.at("price", default: 0) != 0 {
+          [#format_dollars(decimal(data.at("price")))]
+        } else {
+          []
+        }
       }
     )},
     table.hline(),
     table.footer([*Total Price* #text(size: 12pt)[_\*State Sales Tax, if applicable, is not included\*_]],[*#format_dollars(total.sum(default: 0))*],)
   )
+  if (off52.get()) {
+    align(left)[#text(size: 14pt)[*Contract: OFF52*\ *Vendor Code: VC6000163876*]]
+  } else if (fac126.get()) {
+    align(left)[#text(size: 14pt)[*Contract: FAC126*\ *Vendor Code: VC6000163876*]]
+  } else if (gsa71.get()) {
+    align(left)[#text(size: 14pt)[*NOTE: This is using SSC#":" 2750 Contract#":" GS-28F-006BA*]]
+  } else if (gsa84.get()) {
+    align(left)[#text(size: 14pt)[*NOTE: This is using SSC#":" 2725 Contract#":" GS-28F-006BA*]]
+  } else if (mhec.get()) {
+    align(left)[#text(size: 14pt)[*Contract: MC12-C07*]]
+  } else if (ny.get()) {
+    align(left)[#text(size: 14pt)[*Group: 20915*\ *Vendor Code: 23109*]]
+  }
 }
 #pagebreak()

@@ -23,6 +23,13 @@
 #let invest-state = state("invest", "")
 #let quantity-state = state("quantity", "")
 #let carriageCost = state("carriageCost", "")
+#let lumpSumBool = state("lumpSumBool", "")
+#let off52 = state("off52", "")
+#let fac126 = state("fac126", "")
+#let gsa71 = state("gsa71", "")
+#let gsa84 = state("gsa84", "")
+#let mhec = state("mhec", "")
+#let ny = state("ny", "")
 
 #let setup(
     title: none,
@@ -53,6 +60,13 @@
     invest: none,
     quantity: none,
     carriage: none,
+    lump: none,
+    off52Bool: none,
+    fac126Bool: none,
+    gsa71Bool: none,
+    gsa84Bool: none,
+    mhecBool: none,
+    nyBool: none,
     doc
 ) = {
     set page("us-letter")
@@ -85,6 +99,13 @@
     invest-state.update(invest)
     quantity-state.update(quantity)
     carriageCost.update(carriage)
+    lumpSumBool.update(lump)
+    off52.update(off52Bool)
+    fac126.update(fac126Bool)
+    gsa71.update(gsa71Bool)
+    gsa84.update(gsa84Bool)
+    mhec.update(mhecBool)
+    ny.update(nyBool)
     doc
 }
 

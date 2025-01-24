@@ -17,7 +17,7 @@
 )
 
 #include "/templates/corporate.typ"
-#if ($quote$) {
+#if ($quoteBool$) {
     include "/templates/quote.typ"
 }
 
@@ -28,6 +28,13 @@
     invest: $invest$,
     quantity: $quantity$,
     carriage: $carriage$,
+    lump: $lumpBool$,
+    off52Bool: $off52$,
+    fac126Bool: $fac126$,
+    gsa71Bool: $gsa71$,
+    gsa84Bool: $gsa84$,
+    mhecBool: $mhec$,
+    nyBool: $ny$,
 )
 #include "/templates/cover.typ"
 
