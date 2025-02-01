@@ -16,6 +16,8 @@
 
 #set par(leading: 0.35em, spacing: 1.5em, justify: true)
 
+/* TODO: have to add multiple quotes for all the markets */
+
 = Testimonial
 #set align(horizon)
 #quote(block: true, attribution: [#emph(text(size: 12pt)[Production Manager])])[We are very pleased with the start-to-finish process that Donnegan had provided. The system operates exactly as promised and I am very pleased how everything went.
