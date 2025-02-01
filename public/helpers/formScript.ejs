@@ -1,64 +1,64 @@
 <script>
-    const form = document.getElementById("pdf-form");
+  const form = document.getElementById("pdf-form");
 
-    // Function to remove the element
-    function removeSection(element) {
-        if (element) {
-            element.remove(); // Remove the element from the DOM
-        }
+  // Function to remove the element
+  function removeSection(element) {
+    if (element) {
+      element.remove(); // Remove the element from the DOM
     }
+  }
 
-    function addEquipSection() {
-        const section = document.getElementById('equipment-section');
-        const equipDiv = document.createElement('div');
-        equipDiv.className = 'nested-section equip-room'; // Added 'equip-room' class
-        equipDiv.innerHTML = `
+  function addEquipSection() {
+    const section = document.getElementById('equipment-section');
+    const equipDiv = document.createElement('div');
+    equipDiv.className = 'nested-section equip-room'; // Added 'equip-room' class
+    equipDiv.innerHTML = `
             <label class="form-label">Room Name: <input type="text" name="equipRoomName" placeholder="Room Name" class="form-control" required /></label>
             <div class="equip-items"></div>
             <button type="button" class="btn btn-primary btn-sm me-2" onclick="addEquipItem(this)">Add Item</button>
             <button type="button" class="btn btn-danger btn-sm" onclick="this.parentNode.remove()">Remove Room</button>
         `;
-        section.appendChild(equipDiv);
-    }
+    section.appendChild(equipDiv);
+  }
 
-    function addEquipItem(button) {
-        const container = button.previousElementSibling;
-        const itemDiv = document.createElement('div');
-        itemDiv.innerHTML = `
+  function addEquipItem(button) {
+    const container = button.previousElementSibling;
+    const itemDiv = document.createElement('div');
+    itemDiv.innerHTML = `
         <label class="form-label">Item: <input type="text" name="equipItem" size="175" class="form-control" required /></label>
         <button type="button" class="btn btn-danger btn-sm" onclick="this.parentNode.remove()">Remove Item</button>
       `;
-        container.appendChild(itemDiv);
-    }
+    container.appendChild(itemDiv);
+  }
 
-    /** ==========================
-     *  Dynamic Summary Section
-     ========================== **/
-    function addSummarySolution() {
-        const container = document.getElementById('summary-solutions');
-        const solutionDiv = document.createElement('div');
-        solutionDiv.className = 'nested-section';
-        solutionDiv.innerHTML = `
+  /** ==========================
+   *  Dynamic Summary Section
+   ========================== **/
+  function addSummarySolution() {
+    const container = document.getElementById('summary-solutions');
+    const solutionDiv = document.createElement('div');
+    solutionDiv.className = 'nested-section';
+    solutionDiv.innerHTML = `
         <label class="form-label">Solution: <input type="text" name="summarySolution" class="form-control" required /></label>
         <button type="button" class="btn btn-danger btn-sm" onclick="this.parentNode.remove()">Remove Solution</button>
       `;
-        container.appendChild(solutionDiv);
+    container.appendChild(solutionDiv);
+  }
+
+  /** ==========================
+  * Add New Investment Section
+  ========================== **/
+  function addInvestSection(name = "", items = [], price = "") {
+    const container = document.getElementById("investment-container");
+    if (!container) {
+      console.error("Investment container not found!");
+      return;
     }
 
-    /** ==========================
-    * Add New Investment Section
-    ========================== **/
-    function addInvestSection(name = "", items = [], price = "") {
-        const container = document.getElementById("investment-container");
-        if (!container) {
-            console.error("Investment container not found!");
-            return;
-        }
-
-        const investDiv = document.createElement("div");
-        investDiv.className = "card nested-section invest-section mb-2";
-        investDiv.setAttribute("draggable", true); // Enable drag-and-drop
-        investDiv.innerHTML = `
+    const investDiv = document.createElement("div");
+    investDiv.className = "card nested-section invest-section mb-2";
+    investDiv.setAttribute("draggable", true); // Enable drag-and-drop
+    investDiv.innerHTML = `
         <div class="row p-2">
             <div class="col-6">
                 <div class="input-group">
@@ -77,534 +77,608 @@
         <div class="row">
         <div class="invest-items col">
             ${items
-                .map(
-                    (item) => `
+        .map(
+          (item) => `
                 <div class="input-group px-2 pb-2">
                 <span class="input-group-text">Item</span>
                 <textarea class="form-control" rows="1" name="investItem" required>${item}</textarea>
                 <button type="button" class="btn btn-danger" onclick="this.parentNode.remove()"><i class="bi bi-x-square-fill"></i></button>
                 </div>
             `
-                )
-                .join("")}
+        )
+        .join("")}
         </div>
         </div>
         `;
 
-        /*investDiv.addEventListener("dragstart", (e) => {
-            currentDragElement = investDiv;
-            investDiv.style.opacity = "0.5"; // Highlight dragging
-        });
+    /*investDiv.addEventListener("dragstart", (e) => {
+        currentDragElement = investDiv;
+        investDiv.style.opacity = "0.5"; // Highlight dragging
+    });
 
-        investDiv.addEventListener("dragend", () => {
-            currentDragElement.style.opacity = "1"; // Remove highlight
-            currentDragElement = null;
-        });
+    investDiv.addEventListener("dragend", () => {
+        currentDragElement.style.opacity = "1"; // Remove highlight
+        currentDragElement = null;
+    });
 
-        investDiv.addEventListener("dragover", (e) => {
-            e.preventDefault(); // Allow dropping
-            const container = document.getElementById("investment-container");
-            const target = e.target.closest(".invest-section");
+    investDiv.addEventListener("dragover", (e) => {
+        e.preventDefault(); // Allow dropping
+        const container = document.getElementById("investment-container");
+        const target = e.target.closest(".invest-section");
 
-            if (target && target !== currentDragElement) {
-                const targetRect = target.getBoundingClientRect();
-                const offset = e.clientY - targetRect.top;
+        if (target && target !== currentDragElement) {
+            const targetRect = target.getBoundingClientRect();
+            const offset = e.clientY - targetRect.top;
 
-                if (offset > targetRect.height / 2) {
-                    // Insert before the valid target
-                    container.insertBefore(currentDragElement, target);
-                } else {
-                    // If no target, move to the top of the container
-                    container.insertBefore(currentDragElement, container.firstChild);
-                }
+            if (offset > targetRect.height / 2) {
+                // Insert before the valid target
+                container.insertBefore(currentDragElement, target);
+            } else {
+                // If no target, move to the top of the container
+                container.insertBefore(currentDragElement, container.firstChild);
             }
-        });*/
+        }
+    });*/
 
-        container.appendChild(investDiv);
-        initializeDragAndDrop();
-        // Find all price inputs
-        const priceInputs = document.querySelectorAll('input[name="investPrice"]');
+    container.appendChild(investDiv);
+    initializeDragAndDrop();
+    // Find all price inputs
+    const priceInputs = document.querySelectorAll('input[name="investPrice"]');
 
-        // Attach comma formatting to each price input
-        priceInputs.forEach(attachCommaFormatting);
+    // Attach comma formatting to each price input
+    priceInputs.forEach(attachCommaFormatting);
+  }
+
+  /** ==========================
+   * Add New Item to Investment Section
+   ========================== **/
+  function addInvestItem(button) {
+    //const container = button.previousElementSibling;
+    const investSection = button.closest('.invest-section');
+    if (!investSection) {
+      console.error('Invest section not found!');
+      return;
     }
 
-    /** ==========================
-     * Add New Item to Investment Section
-     ========================== **/
-    function addInvestItem(button) {
-        //const container = button.previousElementSibling;
-        const investSection = button.closest('.invest-section');
-        if (!investSection) {
-            console.error('Invest section not found!');
-            return;
-        }
+    const investItemsContainer = investSection.querySelector('.invest-items');
+    if (!investItemsContainer) {
+      console.error('Invest items container not found!');
+      return;
+    }
 
-        const investItemsContainer = investSection.querySelector('.invest-items');
-        if (!investItemsContainer) {
-            console.error('Invest items container not found!');
-            return;
-        }
-
-        const itemDiv = document.createElement("div");
-        itemDiv.className = 'input-group px-2 pb-2';
-        itemDiv.innerHTML = `
+    const itemDiv = document.createElement("div");
+    itemDiv.className = 'input-group px-2 pb-2';
+    itemDiv.innerHTML = `
             <span class="input-group-text">Item</span>
             <textarea class="form-control" rows=1 name="investItem" required></textarea>
             <button type="button" class="btn btn-danger" onclick="this.parentNode.remove()"><i class="bi bi-x-square-fill"></i></button>
     `;
-        investItemsContainer.appendChild(itemDiv);
-    }
+    investItemsContainer.appendChild(itemDiv);
+  }
 
-    document.addEventListener("DOMContentLoaded", () => {
-        // Add default "Freight" section
-        addInvestSection("Freight", ["SHIPPER PREPAYS FREIGHT – ADDS TO CUSTOMER INVOICE", "Due to volatility in freight charges, the shipping cost provided on this quote is an ESTIMATE only. Freight costs and the number of truckloads may change. The actual freight cost will be charged at the time of shipment OR on the final invoice."], ""); // Predefined items and empty price
-        const textareas = document.querySelectorAll("textarea");
+  document.addEventListener("DOMContentLoaded", () => {
+    // Add default "Freight" section
+    addInvestSection("Freight", ["SHIPPER PREPAYS FREIGHT – ADDS TO CUSTOMER INVOICE", "Due to volatility in freight charges, the shipping cost provided on this quote is an ESTIMATE only. Freight costs and the number of truckloads may change. The actual freight cost will be charged at the time of shipment OR on the final invoice."], ""); // Predefined items and empty price
+    const textareas = document.querySelectorAll("textarea");
 
-        const resizeTextarea = (textarea) => {
-            // Reset height to auto to recalculate
-            textarea.style.height = "auto";
+    const resizeTextarea = (textarea) => {
+      // Reset height to auto to recalculate
+      textarea.style.height = "auto";
 
-            // Set height to scrollHeight
-            textarea.style.height = `${textarea.scrollHeight}px`;
-        };
+      // Set height to scrollHeight
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    };
 
-        textareas.forEach((textarea) => {
-            // Attach input event to dynamically resize on text changes
-            textarea.addEventListener("input", () => resizeTextarea(textarea));
+    textareas.forEach((textarea) => {
+      // Attach input event to dynamically resize on text changes
+      textarea.addEventListener("input", () => resizeTextarea(textarea));
 
-            // Resize on page load to fit pre-filled content
-            resizeTextarea(textarea);
-        });
-
-        // Reinitialize comma formatting for dynamically added price inputs
-        document.getElementById("investment-container").addEventListener("DOMNodeInserted", (e) => {
-            if (e.target.tagName === "INPUT" && e.target.name === "investPrice") {
-                numberWithCommas(e.target);
-            }
-        });
+      // Resize on page load to fit pre-filled content
+      resizeTextarea(textarea);
     });
 
-    /** Generate JSON */
-    document.getElementById("generate-json").addEventListener("click", (e) => {
-        e.preventDefault();
-        const data = prepareFormData(form);
-        //const formData = new FormData(form);
-
-        // Filter out certain fields
-        /*const filteredData = Array.from(formData.entries()).filter(([key, value]) => {
-            // Exclude fields with specific names
-            return !['investSectionName', 'investItem', 'investPrice'].includes(key);
-        });*/
-
-        /*const data = Object.fromEntries(filteredData);
-
-        data.equip = {};
-        data.summary = { Objectives: formData.get('summaryObjective'), Solutions: [] };
-        data.invest = {};
-
-        /** ==========================
-         * Process Equipment Section (Dynamic)
-         ========================== **
-        const equipSections = document.querySelectorAll('.equip-room');
-        equipSections.forEach((section) => {
-            const roomName = section.querySelector('[name="equipRoomName"]').value.trim();
-            if (roomName) {
-                const items = Array.from(
-                    section.querySelectorAll('[name="equipItem"]')
-                )
-                    .map((item) => item.value.trim())
-                    .filter((item) => item);
-                if (items.length > 0) {
-                    data.equip[roomName] = items;
-                }
-            }
-        });
-
-        /** ==========================
-         * Process Summary Section
-         ========================== **
-        document.querySelectorAll('[name="summarySolution"]').forEach((input) => {
-            const solution = input.value.trim();
-            if (solution) {
-                data.summary.Solutions.push(solution);
-            }
-        });
-
-        /** ==========================
-         * Process Investment Section (Dynamic)
-         ========================== **
-        const investSections = document.querySelectorAll('.invest-section');
-        investSections.forEach((section) => {
-            const sectionName = section.querySelector('[name="investSectionName"]').value.trim();
-            if (sectionName) {
-                const items = Array.from(
-                    section.querySelectorAll('[name="investItem"]')
-                )
-                    .map((item) => item.value.trim())
-                    .filter((item) => item);
-
-                const priceInput = section.querySelector('[name="investPrice"]');
-                const price = priceInput && priceInput.value.trim() ? priceInput.value : null;
-
-                if (items.length > 0 || price) {
-                    data.invest[sectionName] = {
-                        items: items,
-                        ...(price ? { price } : {}) // Add price only if it's non-empty
-                    };
-                }
-            }
-        });*/
-
-        const jsonBlob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(jsonBlob);
-        link.download = `${(data.title || "generated").replace(/[^a-zA-Z0-9-_]/g, "_").substring(0, 50)}.json`;
-        link.click();
+    // Reinitialize comma formatting for dynamically added price inputs
+    document.getElementById("investment-container").addEventListener("DOMNodeInserted", (e) => {
+      if (e.target.tagName === "INPUT" && e.target.name === "investPrice") {
+        numberWithCommas(e.target);
+      }
     });
+  });
+
+  /** Generate JSON */
+  document.getElementById("generate-json").addEventListener("click", (e) => {
+    e.preventDefault();
+    const data = prepareFormData(form);
+    //const formData = new FormData(form);
+
+    // Filter out certain fields
+    /*const filteredData = Array.from(formData.entries()).filter(([key, value]) => {
+        // Exclude fields with specific names
+        return !['investSectionName', 'investItem', 'investPrice'].includes(key);
+    });*/
+
+    /*const data = Object.fromEntries(filteredData);
+
+    data.equip = {};
+    data.summary = { Objectives: formData.get('summaryObjective'), Solutions: [] };
+    data.invest = {};
 
     /** ==========================
-    * Form Submission
-    ========================== **/
-    document.getElementById('generate-pdf').addEventListener("click", async (e) => {
-        e.preventDefault();
-        //const formData = new FormData(form);
-
-        // Filter out certain fields
-        /*const filteredData = Array.from(formData.entries()).filter(([key, value]) => {
-            // Exclude fields with specific names
-            return !['investSectionName', 'investItem', 'investPrice'].includes(key);
-        });*/
-
-        const data = prepareFormData(form);
-        /*const data = Object.fromEntries(filteredData);
-
-        data.equip = {};
-        data.summary = { Objectives: formData.get('summaryObjective'), Solutions: [] };
-        data.invest = {};
-
-        /** ==========================
-         * Process Equipment Section (Dynamic)
-         ========================== **
-        const equipSections = document.querySelectorAll('.equip-room');
-        equipSections.forEach((section) => {
-            const roomName = section.querySelector('[name="equipRoomName"]').value.trim();
-            if (roomName) {
-                const items = Array.from(
-                    section.querySelectorAll('[name="equipItem"]')
-                )
-                    .map((item) => item.value.trim())
-                    .filter((item) => item);
-                if (items.length > 0) {
-                    data.equip[roomName] = items;
-                }
+     * Process Equipment Section (Dynamic)
+     ========================== **
+    const equipSections = document.querySelectorAll('.equip-room');
+    equipSections.forEach((section) => {
+        const roomName = section.querySelector('[name="equipRoomName"]').value.trim();
+        if (roomName) {
+            const items = Array.from(
+                section.querySelectorAll('[name="equipItem"]')
+            )
+                .map((item) => item.value.trim())
+                .filter((item) => item);
+            if (items.length > 0) {
+                data.equip[roomName] = items;
             }
-        });
-
-        /** ==========================
-         * Process Summary Section
-         ========================== **
-        document.querySelectorAll('[name="summarySolution"]').forEach((input) => {
-            const solution = input.value.trim();
-            if (solution) {
-                data.summary.Solutions.push(solution);
-            }
-        });
-
-        /** ==========================
-         * Process Investment Section (Dynamic)
-         ========================== **
-        const investSections = document.querySelectorAll('.invest-section');
-        investSections.forEach((section) => {
-            const sectionName = section.querySelector('[name="investSectionName"]').value.trim();
-            if (sectionName) {
-                const items = Array.from(
-                    section.querySelectorAll('[name="investItem"]')
-                )
-                    .map((item) => item.value.trim())
-                    .filter((item) => item);
-
-                const priceInput = section.querySelector('[name="investPrice"]');
-                const price = priceInput && priceInput.value.trim() ? priceInput.value : null;
-
-                if (items.length > 0 || price) {
-                    data.invest[sectionName] = {
-                        items: items,
-                        ...(price ? { price } : {}) // Add price only if it's non-empty
-                    };
-                }
-            }
-        });*/
-
-        console.log('Final Data Before Sending:', JSON.stringify(data, null, 2));
-
-        try {
-            const response = await fetch('/generate-pdf', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-
-            if (response.ok) {
-                const blob = await response.blob();
-                const pdfUrl = URL.createObjectURL(blob);
-
-                const a = document.createElement('a');
-                a.href = pdfUrl;
-                //a.download = 'generated.pdf';
-                a.download = `${(data.title || "generated").replace(/[^a-zA-Z0-9-_]/g, "_").substring(0, 50)}.pdf`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-
-                URL.revokeObjectURL(pdfUrl);
-                //alert('PDF generated successfully!');
-            } else {
-                console.error('PDF generation failed:', await response.text());
-                alert('Failed to generate PDF');
-            }
-        } catch (error) {
-            console.error('Error submitting form:', error);
-            alert('An error occurred while generating the PDF.');
         }
     });
 
-    document.getElementById("load-json").addEventListener("click", async () => {
-        const fileInput = document.createElement("input");
-        fileInput.type = "file";
-        fileInput.accept = "application/json";
-
-        fileInput.addEventListener("change", async (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const jsonData = JSON.parse(e.target.result);
-                    populateForm(jsonData);
-                } catch (error) {
-                    console.error("Invalid JSON file", error);
-                    alert("Failed to load JSON file. Please check its structure.");
-                }
-            };
-            reader.readAsText(file);
-        });
-
-        fileInput.click();
+    /** ==========================
+     * Process Summary Section
+     ========================== **
+    document.querySelectorAll('[name="summarySolution"]').forEach((input) => {
+        const solution = input.value.trim();
+        if (solution) {
+            data.summary.Solutions.push(solution);
+        }
     });
 
-    // Populate form with data
-    function populateForm(data) {
-        const form = document.getElementById("pdf-form");
+    /** ==========================
+     * Process Investment Section (Dynamic)
+     ========================== **
+    const investSections = document.querySelectorAll('.invest-section');
+    investSections.forEach((section) => {
+        const sectionName = section.querySelector('[name="investSectionName"]').value.trim();
+        if (sectionName) {
+            const items = Array.from(
+                section.querySelectorAll('[name="investItem"]')
+            )
+                .map((item) => item.value.trim())
+                .filter((item) => item);
 
-        // Populate basic fields
-        Object.keys(data).forEach((key) => {
-            const field = form.querySelector(`[name="${key}"]`);
-            if (field) {
-                if (field.type === "checkbox") {
-                    field.checked = data[key];
-                } else {
-                    field.value = data[key];
-                }
+            const priceInput = section.querySelector('[name="investPrice"]');
+            const price = priceInput && priceInput.value.trim() ? priceInput.value : null;
+
+            if (items.length > 0 || price) {
+                data.invest[sectionName] = {
+                    items: items,
+                    ...(price ? { price } : {}) // Add price only if it's non-empty
+                };
             }
-        });
+        }
+    });*/
 
-        // Handle equipment (dynamically create missing rooms and items)
-        if (data.equip && Object.keys(data.equip).length > 0) {
-            const equipSection = document.getElementById("equipment-section");
-            equipSection.innerHTML = `<button type="button" onclick="addEquipSection()">Add Room</button>`; // Clear existing equipment
-            Object.entries(data.equip).forEach(([roomName, items]) => {
-                const roomDiv = document.createElement("div");
-                roomDiv.className = "nested-section equip-room";
-                roomDiv.innerHTML = `
+    const jsonBlob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
+
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(jsonBlob);
+    link.download = `${(data.title || "generated").replace(/[^a-zA-Z0-9-_]/g, "_").substring(0, 50)}.json`;
+    link.click();
+  });
+
+  /** ==========================
+  * Form Submission
+  ========================== **/
+  document.getElementById('generate-pdf').addEventListener("click", async (e) => {
+    e.preventDefault();
+    //const formData = new FormData(form);
+
+    // Filter out certain fields
+    /*const filteredData = Array.from(formData.entries()).filter(([key, value]) => {
+        // Exclude fields with specific names
+        return !['investSectionName', 'investItem', 'investPrice'].includes(key);
+    });*/
+
+    const data = prepareFormData(form);
+    /*const data = Object.fromEntries(filteredData);
+
+    data.equip = {};
+    data.summary = { Objectives: formData.get('summaryObjective'), Solutions: [] };
+    data.invest = {};
+
+    /** ==========================
+     * Process Equipment Section (Dynamic)
+     ========================== **
+    const equipSections = document.querySelectorAll('.equip-room');
+    equipSections.forEach((section) => {
+        const roomName = section.querySelector('[name="equipRoomName"]').value.trim();
+        if (roomName) {
+            const items = Array.from(
+                section.querySelectorAll('[name="equipItem"]')
+            )
+                .map((item) => item.value.trim())
+                .filter((item) => item);
+            if (items.length > 0) {
+                data.equip[roomName] = items;
+            }
+        }
+    });
+
+    /** ==========================
+     * Process Summary Section
+     ========================== **
+    document.querySelectorAll('[name="summarySolution"]').forEach((input) => {
+        const solution = input.value.trim();
+        if (solution) {
+            data.summary.Solutions.push(solution);
+        }
+    });
+
+    /** ==========================
+     * Process Investment Section (Dynamic)
+     ========================== **
+    const investSections = document.querySelectorAll('.invest-section');
+    investSections.forEach((section) => {
+        const sectionName = section.querySelector('[name="investSectionName"]').value.trim();
+        if (sectionName) {
+            const items = Array.from(
+                section.querySelectorAll('[name="investItem"]')
+            )
+                .map((item) => item.value.trim())
+                .filter((item) => item);
+
+            const priceInput = section.querySelector('[name="investPrice"]');
+            const price = priceInput && priceInput.value.trim() ? priceInput.value : null;
+
+            if (items.length > 0 || price) {
+                data.invest[sectionName] = {
+                    items: items,
+                    ...(price ? { price } : {}) // Add price only if it's non-empty
+                };
+            }
+        }
+    });*/
+
+    console.log('Final Data Before Sending:', JSON.stringify(data, null, 2));
+
+    try {
+      const response = await fetch('/generate-pdf', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const pdfUrl = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = pdfUrl;
+        //a.download = 'generated.pdf';
+        a.download = `${(data.title || "generated").replace(/[^a-zA-Z0-9-_]/g, "_").substring(0, 50)}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        URL.revokeObjectURL(pdfUrl);
+        //alert('PDF generated successfully!');
+      } else {
+        console.error('PDF generation failed:', await response.text());
+        alert('Failed to generate PDF');
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert('An error occurred while generating the PDF.');
+    }
+  });
+
+  document.getElementById("load-json").addEventListener("click", async () => {
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = "application/json";
+
+    fileInput.addEventListener("change", async (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const jsonData = JSON.parse(e.target.result);
+          populateForm(jsonData);
+        } catch (error) {
+          console.error("Invalid JSON file", error);
+          alert("Failed to load JSON file. Please check its structure.");
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    fileInput.click();
+  });
+
+  // Populate form with data
+  function populateForm(data) {
+    const form = document.getElementById("pdf-form");
+
+    // Populate basic fields
+    Object.keys(data).forEach((key) => {
+      const field = form.querySelector(`[name="${key}"]`);
+      if (field) {
+        if (field.type === "checkbox") {
+          field.checked = data[key];
+        } else {
+          field.value = data[key];
+        }
+      }
+    });
+
+    // Handle equipment (dynamically create missing rooms and items)
+    if (data.equip && Object.keys(data.equip).length > 0) {
+      const equipSection = document.getElementById("equipment-section");
+      equipSection.innerHTML = `<button type="button" onclick="addEquipSection()">Add Room</button>`; // Clear existing equipment
+      Object.entries(data.equip).forEach(([roomName, items]) => {
+        const roomDiv = document.createElement("div");
+        roomDiv.className = "nested-section equip-room";
+        roomDiv.innerHTML = `
                 <label>Room Name: <input type="text" name="equipRoomName" value="${roomName}" placeholder="Room Name" required /></label>
                 <div class="equip-items">
                     ${items
-                        .map(
-                            (item) => `
+            .map(
+              (item) => `
                         <div>
                             <label>Item: <input type="text" name="equipItem" value="${item}" required /></label>
                             <button type="button" onclick="this.parentNode.remove()">Remove Item</button>
                         </div>
                     `
-                        )
-                        .join("")}
+            )
+            .join("")}
                 </div>
                 <button type="button" onclick="addEquipItem(this)">Add Item</button>
                 <button type="button" onclick="this.parentNode.remove()">Remove Room</button>
             `;
-                equipSection.appendChild(roomDiv);
-            });
-        } else {
-            const equipSection = document.getElementById("equipment-section");
-            equipSection.innerHTML = `
+        equipSection.appendChild(roomDiv);
+      });
+    } else {
+      const equipSection = document.getElementById("equipment-section");
+      equipSection.innerHTML = `
             <button type="button" onclick="addEquipSection()">Add Room</button>
         `;
-        }
+    }
 
-        // Handle summary solutions
-        if (data.summary && data.summary.Solutions) {
-            const summaryContainer = document.getElementById("summary-solutions");
-            summaryContainer.innerHTML = ""; // Clear existing solutions
-            data.summary.Solutions.forEach((solution) => {
-                const solutionDiv = document.createElement("div");
-                solutionDiv.className = "nested-section";
-                solutionDiv.innerHTML = `
+    // Handle summary solutions
+    if (data.summary && data.summary.Solutions) {
+      const summaryContainer = document.getElementById("summary-solutions");
+      summaryContainer.innerHTML = ""; // Clear existing solutions
+      data.summary.Solutions.forEach((solution) => {
+        const solutionDiv = document.createElement("div");
+        solutionDiv.className = "nested-section";
+        solutionDiv.innerHTML = `
                 <label>Solution: <input type="text" name="summarySolution" value="${solution}" required /></label>
                 <button type="button" onclick="this.parentNode.remove()">Remove Solution</button>
             `;
-                summaryContainer.appendChild(solutionDiv);
-            });
+        summaryContainer.appendChild(solutionDiv);
+      });
+    }
+
+    // Handle investment sections (dynamically create missing sections and items)
+    if (data.invest) {
+      const investContainer = document.getElementById("investment-container");
+      investContainer.innerHTML = ""; // Clear existing investment sections
+      Object.entries(data.invest).forEach(([sectionName, {items, price}]) => {
+        addInvestSection(sectionName, items || [], price || "");
+      });
+    }
+
+    // Handle the dropdown explicitly
+    const selectDropdown = document.querySelector('[name="imgpath"]');
+    if (selectDropdown) {
+      selectDropdown.value = data.imgpath || ""; // Set to saved value or default if not present
+    }
+  }
+
+  function initializeDragAndDrop() {
+    const sections = document.querySelectorAll(".invest-section");
+    sections.forEach((section) => {
+      section.addEventListener("dragstart", () => {
+        currentDragElement = section;
+        section.style.opacity = "0.5";
+      });
+
+      section.addEventListener("dragend", () => {
+        section.style.opacity = "1";
+        currentDragElement = null;
+      });
+
+      section.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        const container = document.getElementById("investment-container");
+        const target = e.target.closest(".invest-section");
+
+        if (target && target !== currentDragElement) {
+          const targetRect = target.getBoundingClientRect();
+          const offset = e.clientY - targetRect.top;
+
+          if (offset > targetRect.height / 2) {
+            container.insertBefore(currentDragElement, target.nextSibling);
+          } else {
+            container.insertBefore(currentDragElement, target);
+          }
         }
-
-        // Handle investment sections (dynamically create missing sections and items)
-        if (data.invest) {
-            const investContainer = document.getElementById("investment-container");
-            investContainer.innerHTML = ""; // Clear existing investment sections
-            Object.entries(data.invest).forEach(([sectionName, { items, price }]) => {
-                addInvestSection(sectionName, items || [], price || "");
-            });
-        }
-
-        // Handle the dropdown explicitly
-        const selectDropdown = document.querySelector('[name="imgpath"]');
-        if (selectDropdown) {
-            selectDropdown.value = data.imgpath || ""; // Set to saved value or default if not present
-        }
-    }
-
-    function initializeDragAndDrop() {
-        const sections = document.querySelectorAll(".invest-section");
-        sections.forEach((section) => {
-            section.addEventListener("dragstart", () => {
-                currentDragElement = section;
-                section.style.opacity = "0.5";
-            });
-
-            section.addEventListener("dragend", () => {
-                section.style.opacity = "1";
-                currentDragElement = null;
-            });
-
-            section.addEventListener("dragover", (e) => {
-                e.preventDefault();
-                const container = document.getElementById("investment-container");
-                const target = e.target.closest(".invest-section");
-
-                if (target && target !== currentDragElement) {
-                    const targetRect = target.getBoundingClientRect();
-                    const offset = e.clientY - targetRect.top;
-
-                    if (offset > targetRect.height / 2) {
-                        container.insertBefore(currentDragElement, target.nextSibling);
-                    } else {
-                        container.insertBefore(currentDragElement, target);
-                    }
-                }
-            });
-        });
-    }
-    function addCommas(x) {
-        return x.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
-    }
-    // Event listener to format price inputs with commas as the user types
-    function attachCommaFormatting(input) {
-        input.addEventListener("input", (e) => {
-            const cursorPosition = input.selectionStart;
-            const originalValue = input.value;
-            const rawValue = removeCommas(originalValue);
-            const formattedValue = addCommas(rawValue);
-
-            input.value = formattedValue;
-
-            // Adjust cursor position
-            const newPosition = cursorPosition + (formattedValue.length - originalValue.length);
-            input.setSelectionRange(newPosition, newPosition);
-        });
-    }
-    // Helper function to remove commas from a number string
-    function removeCommas(value) {
-        return value.replace(/,/g, "");
-    }
-    /** ==========================
-     * Utility Function: Prepare Form Data
-     ========================== **/
-    function prepareFormData(form) {
-        const formData = new FormData(form);
-        // Filter out certain fields
-        const filteredData = Array.from(formData.entries()).filter(([key, value]) => {
-            // Exclude fields with specific names
-            return !['investSectionName', 'investItem', 'investPrice'].includes(key);
-        });
-        const data = Object.fromEntries(filteredData);
-
-        // Process numeric fields to remove commas for backend submission
-        const numericFields = form.querySelectorAll('input[name="investPrice"]');
-        numericFields.forEach((field) => {
-            const rawValue = removeCommas(field.value);
-            data[field.name] = rawValue; // Update data for submission
-        });
-
-        // Include dynamic sections (Equipment, Summary, Investment)
-        data.equip = {};
-        data.summary = { Objectives: formData.get('summaryObjective'), Solutions: [] };
-        data.invest = {};
-
-        // Process Equipment Section
-        const equipSections = document.querySelectorAll('.equip-room');
-        equipSections.forEach((section) => {
-            const roomName = section.querySelector('[name="equipRoomName"]').value.trim();
-            if (roomName) {
-                const items = Array.from(section.querySelectorAll('[name="equipItem"]'))
-                    .map((item) => item.value.trim())
-                    .filter((item) => item);
-                if (items.length > 0) {
-                    data.equip[roomName] = items;
-                }
-            }
-        });
-
-        // Process Summary Section
-        document.querySelectorAll('[name="summarySolution"]').forEach((input) => {
-            const solution = input.value.trim();
-            if (solution) {
-                data.summary.Solutions.push(solution);
-            }
-        });
-
-        // Process Investment Section
-        const investSections = document.querySelectorAll('.invest-section');
-        investSections.forEach((section) => {
-            const sectionName = section.querySelector('[name="investSectionName"]').value.trim();
-            if (sectionName) {
-                const items = Array.from(section.querySelectorAll('[name="investItem"]'))
-                    .map((item) => item.value.trim())
-                    .filter((item) => item);
-
-                const priceInput = section.querySelector('[name="investPrice"]');
-                const price = priceInput && priceInput.value.trim() ? removeCommas(priceInput.value) : null;
-
-                if (items.length > 0 || price) {
-                    data.invest[sectionName] = {
-                        items: items,
-                        ...(price ? { price } : {}) // Add price only if it's non-empty
-                    };
-                }
-            }
-        });
-
-        return data;
-    }
-    document.addEventListener("click", (event) => {
-        if (event.target.classList.contains("contracts")) {
-            const allContracts = document.querySelectorAll(".contracts");
-            allContracts.forEach((contract) => {
-                if(contract !== event.target) {
-                    contract.checked = false;
-                }
-            });
-        }
+      });
     });
+  }
+  function addCommas(x) {
+    return x.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+  }
+  // Event listener to format price inputs with commas as the user types
+  function attachCommaFormatting(input) {
+    input.addEventListener("input", (e) => {
+      const cursorPosition = input.selectionStart;
+      const originalValue = input.value;
+      const rawValue = removeCommas(originalValue);
+      const formattedValue = addCommas(rawValue);
+
+      input.value = formattedValue;
+
+      // Adjust cursor position
+      const newPosition = cursorPosition + (formattedValue.length - originalValue.length);
+      input.setSelectionRange(newPosition, newPosition);
+    });
+  }
+  // Helper function to remove commas from a number string
+  function removeCommas(value) {
+    return value.replace(/,/g, "");
+  }
+  /** ==========================
+   * Utility Function: Prepare Form Data
+   ========================== **/
+  function prepareFormData(form) {
+    const formData = new FormData(form);
+    // Filter out certain fields
+    const filteredData = Array.from(formData.entries()).filter(([key, value]) => {
+      // Exclude fields with specific names
+      return !['investSectionName', 'investItem', 'investPrice'].includes(key);
+    });
+    const data = Object.fromEntries(filteredData);
+
+    // Process numeric fields to remove commas for backend submission
+    const numericFields = form.querySelectorAll('input[name="investPrice"]');
+    numericFields.forEach((field) => {
+      const rawValue = removeCommas(field.value);
+      data[field.name] = rawValue; // Update data for submission
+    });
+
+    // Include dynamic sections (Equipment, Summary, Investment)
+    data.equip = {};
+    data.summary = {Objectives: formData.get('summaryObjective'), Solutions: []};
+    data.invest = {};
+
+    // Process Equipment Section
+    const equipSections = document.querySelectorAll('.equip-room');
+    equipSections.forEach((section) => {
+      const roomName = section.querySelector('[name="equipRoomName"]').value.trim();
+      if (roomName) {
+        const items = Array.from(section.querySelectorAll('[name="equipItem"]'))
+          .map((item) => item.value.trim())
+          .filter((item) => item);
+        if (items.length > 0) {
+          data.equip[roomName] = items;
+        }
+      }
+    });
+
+    // Process Summary Section
+    document.querySelectorAll('[name="summarySolution"]').forEach((input) => {
+      const solution = input.value.trim();
+      if (solution) {
+        data.summary.Solutions.push(solution);
+      }
+    });
+
+    // Process Investment Section
+    const investSections = document.querySelectorAll('.invest-section');
+    investSections.forEach((section) => {
+      const sectionName = section.querySelector('[name="investSectionName"]').value.trim();
+      if (sectionName) {
+        const items = Array.from(section.querySelectorAll('[name="investItem"]'))
+          .map((item) => item.value.trim())
+          .filter((item) => item);
+
+        const priceInput = section.querySelector('[name="investPrice"]');
+        const price = priceInput && priceInput.value.trim() ? removeCommas(priceInput.value) : null;
+
+        if (items.length > 0 || price) {
+          data.invest[sectionName] = {
+            items: items,
+            ...(price ? {price} : {}) // Add price only if it's non-empty
+          };
+        }
+      }
+    });
+
+    return data;
+  }
+  document.addEventListener("click", (event) => {
+    if (event.target.classList.contains("contracts")) {
+      const allContracts = document.querySelectorAll(".contracts");
+      allContracts.forEach((contract) => {
+        if (contract !== event.target) {
+          contract.checked = false;
+        }
+      });
+    }
+  });
+
+  var currentTab = 0; // Current tab is set to be the first tab (0)
+  showTab(currentTab); // Display the current tab
+
+  function showTab(n) {
+    // This function will display the specified tab of the form ...
+    var x = document.getElementsByClassName("tab");
+    x[n].style.display = "block";
+    // ... and fix the Previous/Next buttons:
+    if (n == 0) {
+      document.getElementById("prevBtn").style.display = "none";
+    } else {
+      document.getElementById("prevBtn").style.display = "inline";
+    }
+    if (n == (x.length - 1)) {
+      document.getElementById("nextBtn").style.display = "none";
+    } else {
+      document.getElementById("nextBtn").style.display = "inline";
+      document.getElementById("nextBtn").innerHTML = "Next";
+    }
+    // ... and run a function that displays the correct step indicator:
+    fixStepIndicator(n)
+  }
+
+  function nextPrev(n) {
+    // This function will figure out which tab to display
+    var x = document.getElementsByClassName("tab");
+    // Exit the function if any field in the current tab is invalid:
+    if (n == 1 && !validateForm()) return false;
+    // Hide the current tab:
+    x[currentTab].style.display = "none";
+    // Increase or decrease the current tab by 1:
+    currentTab = currentTab + n;
+    // if you have reached the end of the form... :
+    if (currentTab >= x.length) {
+      //...the form gets submitted:
+      document.getElementById("regForm").submit();
+      return false;
+    }
+    // Otherwise, display the correct tab:
+    showTab(currentTab);
+  }
+
+  function validateForm() {
+    // This function deals with validation of the form fields
+    var x, y, i, valid = true;
+    x = document.getElementsByClassName("tab");
+    y = x[currentTab].getElementsByTagName("input");
+    // A loop that checks every input field in the current tab:
+    for (i = 0; i < y.length; i++) {
+      // If a field is empty...
+      if (y[i].value == "") {
+        // add an "invalid" class to the field:
+        y[i].className += " invalid";
+        // and set the current valid status to false:
+        valid = false;
+      }
+    }
+    // If the valid status is true, mark the step as finished and valid:
+    if (valid) {
+      document.getElementsByClassName("step")[currentTab].className += " finish";
+    }
+    return valid; // return the valid status
+  }
+
+  function fixStepIndicator(n) {
+    // This function removes the "active" class of all steps...
+    var i, x = document.getElementsByClassName("step");
+    for (i = 0; i < x.length; i++) {
+      x[i].className = x[i].className.replace(" active", "");
+    }
+    //... and adds the "active" class to the current step:
+    x[n].className += " active";
+  }
 </script>
