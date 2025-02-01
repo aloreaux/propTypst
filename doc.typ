@@ -45,7 +45,9 @@
 #outline(indent: true)
 #pagebreak()
 
-#include "/templates/equipment.typ"
+#if ($equipBool$) {
+  include "/templates/equipment.typ"
+}
 
 #include "/templates/investprof.typ"
 
