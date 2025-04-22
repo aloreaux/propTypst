@@ -109,6 +109,69 @@
     doc
 }
 
+#let adaptive_title(t) = {
+    let base_size = 48pt      // Default title font size
+    let min_size = 24pt       // Minimum font size
+    let max_width = 190pt     // Maximum height for 2 lines
+    let final_size = 0pt
+
+    // Measure the text at the base size
+    let measured_size = measure(text[#t])
+
+    let mwidth = measured_size.width
+
+    final_size = if mwidth > max_width {
+      calc.max(base_size * (max_width / mwidth), min_size)
+    } else {
+      base_size
+    } 
+
+    // Return the resized text
+    text(size: final_size)[#t]
+}
+
+#let adaptive_cover(t) = {
+    let base_size = 36pt      // Default cover font size
+    let min_size = 24pt       // Minimum font size
+    let max_width = 180pt     // Maximum height for 2 lines
+    let final_size = 0pt
+
+    // Measure the text at the base size
+    let measured_size = measure(text[#t])
+
+    let mwidth = measured_size.width
+
+    final_size = if mwidth > max_width {
+      calc.max(base_size * (max_width / mwidth), min_size)
+    } else {
+      base_size
+    } 
+
+    // Return the resized text
+    text(size: final_size)[#t]
+}
+
+#let adaptive_project(t) = {
+    let base_size = 16pt      // Default cover font size
+    let min_size = 10pt       // Minimum font size
+    let max_width = 315pt     // Maximum height for 2 lines
+    let final_size = 0pt
+
+    // Measure the text at the base size
+    let measured_size = measure(text[#t])
+
+    let mwidth = measured_size.width
+
+    final_size = if mwidth > max_width {
+      calc.max(base_size * (max_width / mwidth), min_size)
+    } else {
+      base_size
+    } 
+
+    // Return the resized text
+    text(size: final_size)[#t]
+}
+
 #let makecover(
     imgpath: none,
 ) = {
@@ -129,8 +192,8 @@
         dy: 4.75cm,
         rect(width: 100%, fill: donn-black)[#pad(left: 3%, right: 3%, top: 12.5%, bottom: 12.5%, )[
             #context{
-                par(leading: 0.4em)[#text(font: "Concourse C4", weight: "bold", size: 48pt, fill: donn-blue)[#title-state.get()]]
-                text(font: "Concourse C2", size: 22pt, fill: white)[#v(-6%)#author-state.get()\ ]
+                par(leading: 0.4em)[#text(font: "Concourse C4", weight: "bold", fill: donn-blue)[#adaptive_title(title-state.get())]]
+                text(font: "Concourse C2", size: 22pt, fill: white)[#author-state.get()\ ]
                 text(font: "Concourse C2", size: 22pt, fill: white)[#_today]
             }
         ]]

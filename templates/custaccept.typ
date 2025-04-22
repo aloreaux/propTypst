@@ -40,7 +40,7 @@
 *#donn-name* #context{author-state.get()}
 #v(0.5em)
 #box[#line(length: 100%, stroke: 4pt)]
-*#context{title-state.get()}* #context{customer-state.get()}
+*#context{adaptive_project(title-state.get())}* #context{customer-state.get()}
 #v(0.5em)
 
 #set text(size: 11.75pt)

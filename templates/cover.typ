@@ -3,7 +3,7 @@
 #set par(leading: 0.35em, spacing: 1.5em, first-line-indent: 1.25em, justify: true)
 
 #align(center)[
-  #text(font: "Concourse C4", size: 36pt, weight: "bold")[#context {title-state.get()}]
+  #text(font: "Concourse C4", weight: "bold")[#context {adaptive_cover(title-state.get())}]
   #v(1fr)
   #text(font: "Concourse C2", size: 18pt, weight: "regular")[#context {customer-state.get()}]
   #v(1fr)

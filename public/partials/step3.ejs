@@ -1,5 +1,5 @@
 <!-- Dynamic Summary Section -->
-<h2 class="mt-4 mb-3">Summary</h2>
+<!--<h2 class="mt-4 mb-3">Summary</h2>
 <div id="summary-section" class="mb-3">
   <div class="mb-3">
     <label for="summaryObjective" class="form-label">Objective</label>
@@ -7,4 +7,145 @@
   </div>
   <div id="summary-solutions"></div>
   <button type="button" class="btn btn-primary" onclick="addSummarySolution()">Add Solution</button>
+</div>-->
+<!--<h2 class="mt-4 mb-3">Summary Information</h2>
+<div class="row" id="summary-section">
+  <button type="button" class="btn btn-primary" onclick="addSummarySection()">Add Room</button>
+</div>-->
+<h2 class="mt-4 mb-3">Summary Information</h2>
+<div class="row" id="summary-section">
+
+  <!-- Preloaded Sections -->
+  <div class="col-md-6">
+    <div class="card nested-section sum-section mb-2" data-section="Objective">
+      <div class="input-group p-2">
+        <div class="dropdown">
+          <button class="btn btn-outline-secondary dropdown-toggle" type="button"
+            data-bs-toggle="dropdown">Options</button>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item enable-toggle disabled" href="#"
+                onclick="toggleSection('Objective', true)">Enable</a>
+            </li>
+            <li><a class="dropdown-item enable-toggle" href="#" onclick="toggleSection('Objective', false)">Disable</a>
+            </li>
+            <li>
+              <hr class="dropdown-divider">
+            </li>
+            <li><a class="dropdown-item" href="#" onclick="togglePar('Objective', true)">Paragraph</a></li>
+            <li><a class="dropdown-item" href="#" onclick="togglePar('Objective', false)">Item</a></li>
+          </ul>
+        </div>
+        <input type="text" name="summarySectionName" value="Objective" class="form-control section-title" disabled />
+        <button class="btn btn-primary add-item-btn" onclick="addField(this, false)">Add Item</button>
+      </div>
+
+      <div class="summary-items px-2">
+        <div class="input-group mb-2">
+          <span class="input-group-text">Item</span>
+          <input type="text" class="form-control summary-input" name="ObjectiveText" required />
+          <textarea class="form-control summary-textarea" name="ObjectiveArea" rows="3" style="display: none;"
+            disabled></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Repeat for Problem, Solution, and Value -->
+    <div class="card nested-section sum-section mb-2" data-section="Problem">
+      <div class="input-group p-2">
+        <div class="dropdown">
+          <button class="btn btn-outline-secondary dropdown-toggle" type="button"
+            data-bs-toggle="dropdown">Options</button>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item enable-toggle disabled" href="#"
+                onclick="toggleSection('Problem', true)">Enable</a>
+            </li>
+            <li><a class="dropdown-item enable-toggle" href="#" onclick="toggleSection('Problem', false)">Disable</a>
+            </li>
+            <li>
+              <hr class="dropdown-divider">
+            </li>
+            <li><a class="dropdown-item" href="#" onclick="togglePar('Problem', true)">Paragraph</a></li>
+            <li><a class="dropdown-item" href="#" onclick="togglePar('Problem', false)">Item</a></li>
+          </ul>
+        </div>
+        <input type="text" name="summarySectionName" value="Problem" class="form-control section-title" disabled />
+        <button class="btn btn-primary add-item-btn" onclick="addField(this, false)">Add Item</button>
+      </div>
+
+      <div class="summary-items px-2">
+        <div class="input-group mb-2">
+          <span class="input-group-text">Item</span>
+          <input type="text" class="form-control summary-input" name="ProblemText" required />
+          <textarea class="form-control summary-textarea" name="ProblemArea" rows="3" style="display: none;"
+            disabled></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card nested-section sum-section mb-2" data-section="Solution">
+      <div class="input-group p-2">
+        <div class="dropdown">
+          <button class="btn btn-outline-secondary dropdown-toggle" type="button"
+            data-bs-toggle="dropdown">Options</button>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item enable-toggle disabled" href="#"
+                onclick="toggleSection('Solution', true)">Enable</a>
+            </li>
+            <li><a class="dropdown-item enable-toggle" href="#" onclick="toggleSection('Solution', false)">Disable</a>
+            </li>
+            <li>
+              <hr class="dropdown-divider">
+            </li>
+            <li><a class="dropdown-item" href="#" onclick="togglePar('Solution', true)">Paragraph</a></li>
+            <li><a class="dropdown-item" href="#" onclick="togglePar('Solution', false)">Item</a></li>
+          </ul>
+        </div>
+        <input type="text" name="summarySectionName" value="Solution" class="form-control section-title" disabled />
+        <button class="btn btn-primary add-item-btn" onclick="addField(this, false)">Add Item</button>
+      </div>
+
+      <div class="summary-items px-2">
+        <div class="input-group mb-2">
+          <span class="input-group-text">Item</span>
+          <input type="text" class="form-control summary-input" name="SolutionText" required />
+          <textarea class="form-control summary-textarea" name="SolutionArea" rows="3" style="display: none;"
+            disabled></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Repeat for Problem, Solution, and Value -->
+    <div class="card nested-section sum-section mb-2" data-section="Value">
+      <div class="input-group p-2">
+        <div class="dropdown">
+          <button class="btn btn-outline-secondary dropdown-toggle" type="button"
+            data-bs-toggle="dropdown">Options</button>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item enable-toggle disabled" href="#"
+                onclick="toggleSection('Value', true)">Enable</a>
+            </li>
+            <li><a class="dropdown-item enable-toggle" href="#" onclick="toggleSection('Value', false)">Disable</a>
+            </li>
+            <li>
+              <hr class="dropdown-divider">
+            </li>
+            <li><a class="dropdown-item" href="#" onclick="togglePar('Value', true)">Paragraph</a></li>
+            <li><a class="dropdown-item" href="#" onclick="togglePar('Value', false)">Item</a></li>
+          </ul>
+        </div>
+        <input type="text" name="summarySectionName" value="Value" class="form-control section-title" disabled />
+        <button class="btn btn-primary add-item-btn" onclick="addField(this, false)">Add Item</button>
+      </div>
+
+      <div class="summary-items px-2">
+        <div class="input-group mb-2">
+          <span class="input-group-text">Item</span>
+          <input type="text" class="form-control summary-input" name="ValueText" required />
+          <textarea class="form-control summary-textarea" name="ValueArea" rows="3" style="display: none;"
+            disabled></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

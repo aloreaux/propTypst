@@ -25,7 +25,7 @@
     stroke: none,
     table.cell(colspan: 3, align: center)[#text(size: 24pt)[#donn-name]],
     table.hline(),
-    [Project Name],table.cell(colspan: 2)[#title-state.get()],
+    [Project Name],table.cell(colspan: 2)[*#adaptive_project(title-state.get())*],
     table.hline(),
     [Total Project Value:],[*#format_dollars(total.sum(default: 0))*],[#text(size: 10pt)[\*_Does not include State Sales Tax_]],
     table.hline(),

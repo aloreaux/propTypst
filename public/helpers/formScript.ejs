@@ -11,39 +11,88 @@
   function addEquipSection() {
     const section = document.getElementById('equipment-section');
     const equipDiv = document.createElement('div');
-    equipDiv.className = 'nested-section equip-room'; // Added 'equip-room' class
+    equipDiv.className = 'card nested-section equip-room mb-2'; // Added 'equip-room' class
     equipDiv.innerHTML = `
-            <label class="form-label">Room Name: <input type="text" name="equipRoomName" placeholder="Room Name" class="form-control" required /></label>
+        <div class="col-md p-2">
+            <div class="input-group">
+              <span class="input-group-text">Room Name</span>
+              <input type="text" name="equipRoomName" placeholder="Room Name" class="form-control" required />
+              <button type="button" class="btn btn-primary" onclick="addEquipItem(this)">Add Item</button>
+              <button type="button" class="btn btn-danger" onclick="this.closest('.equip-room').remove()">Remove Room</button>
+            </div>
             <div class="equip-items"></div>
-            <button type="button" class="btn btn-primary btn-sm me-2" onclick="addEquipItem(this)">Add Item</button>
-            <button type="button" class="btn btn-danger btn-sm" onclick="this.parentNode.remove()">Remove Room</button>
+        </div>
         `;
     section.appendChild(equipDiv);
   }
 
   function addEquipItem(button) {
+    //const container = button.previousElementSibling;
+    //const itemDiv = document.createElement('div');
+    //itemDiv.innerHTML = `
+    //    <label class="form-label">Item: <input type="text" name="equipItem" size="175" class="form-control" required /></label>
+    //    <button type="button" class="btn btn-danger btn-sm" onclick="this.parentNode.remove()">Remove Item</button>
+    //  `;
+    //container.appendChild(itemDiv);
+    const equipSection = button.closest('.equip-room');
+    if (!equipSection) {
+      console.error('Equip room not found!');
+      return;
+    }
+
+    const equipItemsContainer = equipSection.querySelector('.equip-items');
+    if (!equipItemsContainer) {
+      console.error('Equip items container not found!');
+      return;
+    }
+    const itemDiv = document.createElement("div");
+    itemDiv.className = 'input-group mt-2';
+    itemDiv.innerHTML = `
+            <span class="input-group-text">Item</span>
+            <input type="text" name="equipItem" class="form-control" required />
+            <button type="button" class="btn btn-danger" onclick="this.parentNode.remove()"><i class="bi bi-x-square-fill"></i></button>
+    `;
+    equipItemsContainer.appendChild(itemDiv);
+
+  }
+
+  function addSummarySection() {
+    const section = document.getElementById('summary-section');
+    const summaryDiv = document.createElement('div');
+    summaryDiv.className = 'nested-section sum-section'; // Added 'equip-room' class
+    summaryDiv.innerHTML = `
+            <div class="col-md-6">
+            <label class="form-label">Summary Name: <input type="text" name="summarySectionName" placeholder="Summary Name" class="form-control" required /></label>
+            <div class="summary-items"></div>
+            <button type="button" class="btn btn-primary btn-sm me-2" onclick="addSummaryItem(this)">Add Item</button>
+            <button type="button" class="btn btn-danger btn-sm" onclick="this.parentNode.remove()">Remove Room</button>
+            </div>
+        `;
+    section.appendChild(summaryDiv);
+  }
+
+  function addSummaryItem(button) {
     const container = button.previousElementSibling;
     const itemDiv = document.createElement('div');
     itemDiv.innerHTML = `
-        <label class="form-label">Item: <input type="text" name="equipItem" size="175" class="form-control" required /></label>
+        <label class="form-label">Item: <input type="text" name="summaryItem" size="175" class="form-control" required /></label>
         <button type="button" class="btn btn-danger btn-sm" onclick="this.parentNode.remove()">Remove Item</button>
       `;
     container.appendChild(itemDiv);
   }
-
-  /** ==========================
-   *  Dynamic Summary Section
-   ========================== **/
-  function addSummarySolution() {
-    const container = document.getElementById('summary-solutions');
-    const solutionDiv = document.createElement('div');
-    solutionDiv.className = 'nested-section';
-    solutionDiv.innerHTML = `
-        <label class="form-label">Solution: <input type="text" name="summarySolution" class="form-control" required /></label>
-        <button type="button" class="btn btn-danger btn-sm" onclick="this.parentNode.remove()">Remove Solution</button>
-      `;
-    container.appendChild(solutionDiv);
-  }
+  ///** ==========================
+  // *  Dynamic Summary Section
+  // ========================== **/
+  //function addSummarySolution() {
+  //  const container = document.getElementById('summary-solutions');
+  //  const solutionDiv = document.createElement('div');
+  //  solutionDiv.className = 'nested-section';
+  //  solutionDiv.innerHTML = `
+  //      <label class="form-label">Solution: <input type="text" name="summarySolution" class="form-control" required /></label>
+  //      <button type="button" class="btn btn-danger btn-sm" onclick="this.parentNode.remove()">Remove Solution</button>
+  //    `;
+  //  container.appendChild(solutionDiv);
+  //}}
 
   /** ==========================
   * Add New Investment Section
@@ -60,7 +109,7 @@
     investDiv.setAttribute("draggable", true); // Enable drag-and-drop
     investDiv.innerHTML = `
         <div class="row p-2">
-            <div class="col-6">
+            <div class="col-md-6">
                 <div class="input-group">
                     <span class="input-group-text">Section Name</span>
                     <input type="text" name="investSectionName" value="${name}" class="form-control" required />
@@ -75,7 +124,7 @@
             </div>
         </div>
         <div class="row">
-        <div class="invest-items col">
+        <div class="invest-items col-md">
             ${items
         .map(
           (item) => `
@@ -176,6 +225,8 @@
       // Resize on page load to fit pre-filled content
       resizeTextarea(textarea);
     });
+
+    showTab(currentTab); // Ensure first tab is visible
 
     // Reinitialize comma formatting for dynamically added price inputs
     document.getElementById("investment-container").addEventListener("DOMNodeInserted", (e) => {
@@ -414,50 +465,205 @@
     // Handle equipment (dynamically create missing rooms and items)
     if (data.equip && Object.keys(data.equip).length > 0) {
       const equipSection = document.getElementById("equipment-section");
-      equipSection.innerHTML = `<button type="button" onclick="addEquipSection()">Add Room</button>`; // Clear existing equipment
+      equipSection.innerHTML = `<button type="button" class="btn btn-primary mb-3" onclick="addEquipSection()">Add Room</button>`; // Clear existing equipment
       Object.entries(data.equip).forEach(([roomName, items]) => {
         const roomDiv = document.createElement("div");
-        roomDiv.className = "nested-section equip-room";
+        roomDiv.className = "card nested-section equip-room mb-2";
         roomDiv.innerHTML = `
-                <label>Room Name: <input type="text" name="equipRoomName" value="${roomName}" placeholder="Room Name" required /></label>
-                <div class="equip-items">
-                    ${items
+                <div class="col-md p-2">
+                  <div class="input-group">
+                    <span class="input-group-text">Room Name</span>
+                    <input type="text" name="equipRoomName" placeholder="Room Name" class="form-control" value="${roomName}" required />
+                    <button type="button" class="btn btn-primary" onclick="addEquipItem(this)">Add Item</button>
+                    <button type="button" class="btn btn-danger" onclick="this.closest('.equip-room').remove()">Remove Room</button>
+                  </div>
+                  <div class="equip-items">
+                ${items
             .map(
               (item) => `
-                        <div>
-                            <label>Item: <input type="text" name="equipItem" value="${item}" required /></label>
-                            <button type="button" onclick="this.parentNode.remove()">Remove Item</button>
-                        </div>
+                <div class="input-group mt-2">
+                  <span class="input-group-text">Item</span>
+                      <input type="text" name="equipItem" class="form-control" value="${item}" required />
+                  <button type="button" class="btn btn-danger" onclick="this.parentNode.remove()"><i class="bi bi-x-square-fill"></i></button>
+                </div>
                     `
             )
             .join("")}
                 </div>
-                <button type="button" onclick="addEquipItem(this)">Add Item</button>
-                <button type="button" onclick="this.parentNode.remove()">Remove Room</button>
+              </div>
             `;
         equipSection.appendChild(roomDiv);
       });
     } else {
       const equipSection = document.getElementById("equipment-section");
       equipSection.innerHTML = `
-            <button type="button" onclick="addEquipSection()">Add Room</button>
+        <button type="button" class="btn btn-primary mb-3" onclick="addEquipSection()">Add Room</button>
         `;
     }
 
-    // Handle summary solutions
-    if (data.summary && data.summary.Solutions) {
-      const summaryContainer = document.getElementById("summary-solutions");
-      summaryContainer.innerHTML = ""; // Clear existing solutions
-      data.summary.Solutions.forEach((solution) => {
-        const solutionDiv = document.createElement("div");
-        solutionDiv.className = "nested-section";
-        solutionDiv.innerHTML = `
-                <label>Solution: <input type="text" name="summarySolution" value="${solution}" required /></label>
-                <button type="button" onclick="this.parentNode.remove()">Remove Solution</button>
-            `;
-        summaryContainer.appendChild(solutionDiv);
-      });
+    /** ✅ Handle Summary Sections **/
+    const summarySections = document.querySelectorAll(".sum-section");
+    console.log(`🔹 Found ${summarySections.length} summary sections.`); // Debug log
+
+    if (summarySections.length === 0) {
+      console.warn("⚠️ No summary sections found! Check your HTML.");
+      return;
     }
+
+    const summaryOrder = Object.keys(data.summary || {});
+    console.log("📝 Summary Sections in JSON:", summaryOrder);
+
+    summarySections.forEach((section, index) => {
+      console.log(`🔹 Processing summary section ${index + 1}`);
+
+      const titleField = section.querySelector("input.section-title");
+      if (!titleField) {
+        console.warn("⚠️ No title field found for section:", section);
+        return;
+      }
+
+      const originalTitle = titleField.value.trim();
+      console.log(`🎯 Original Title: ${originalTitle}`);
+
+      let sectionName = summaryOrder.find(name => name.toLowerCase().includes(originalTitle.toLowerCase()));
+      if (!sectionName) {
+        console.warn(`🚨 No matching section found for '${originalTitle}' in JSON. Disabling...`);
+        toggleSection(originalTitle, false);
+        return;
+      }
+
+      console.log(`✅ Matched Section Name: ${sectionName}`);
+      titleField.value = sectionName; // Update title if changed
+      toggleSection(originalTitle, true);
+
+      const summaryItemsContainer = section.querySelector(".summary-items");
+      summaryItemsContainer.innerHTML = ""; // Clear existing items
+      const content = data.summary[sectionName];
+
+      if (Array.isArray(content)) {
+        console.log(`📋 Adding ${content.length} text inputs for '${sectionName}'`);
+        content.forEach((item) => {
+          const fieldDiv = document.createElement("div");
+          fieldDiv.className = "input-group mb-2";
+          fieldDiv.innerHTML = `
+                    <input type="text" class="form-control summary-input" name="${sectionName}Text" value="${item}" required />
+                    <button class="btn btn-danger btn-sm" type="button" onclick="this.parentNode.remove()">
+                        <i class="bi bi-x-square-fill"></i>
+                    </button>
+                `;
+          summaryItemsContainer.appendChild(fieldDiv);
+        });
+      } else if (typeof content === "string") {
+        console.log(`📝 Adding textarea for '${sectionName}' with value: ${content}`);
+        const fieldDiv = document.createElement("div");
+        fieldDiv.className = "input-group mb-2";
+        fieldDiv.innerHTML = `
+                <textarea class="form-control summary-textarea" name="${sectionName}Area" rows="3" required>${content}</textarea>
+            `;
+        summaryItemsContainer.appendChild(fieldDiv);
+
+        const addButton = section.querySelector(".add-item-btn");
+        if (addButton) addButton.disabled = true; // Disable "Add Item" button
+      }
+    });
+
+    /** ✅ Handle Summary Sections **/
+    //const summarySections = document.querySelectorAll(".summary-section"); // Get all summary sections in form
+    //const summaryOrder = Object.keys(data.summary || {}); // Get order from JSON
+    //console.log(summaryOrder);
+
+    //summarySections.forEach((section) => {
+    //  console.log('Inside loop');
+    //  const titleField = section.querySelector("input.section-title"); // Title input
+    //  console.log(titleField);
+    //  const originalTitle = titleField.value.trim(); // Default title
+    //  let sectionName = summaryOrder.find(name => name.toLowerCase().includes(originalTitle.toLowerCase()));
+    //  consol.log(originalTitle);
+
+    //  if (sectionName) {
+    //    // ✅ Section exists in JSON → Enable & Populate
+    //    toggleSection(originalTitle, true);
+    //    titleField.value = sectionName; // Update title if changed
+
+    //    const summaryItemsContainer = section.querySelector(".summary-items");
+    //    summaryItemsContainer.innerHTML = ""; // Clear existing items
+
+    //    const content = data.summary[sectionName];
+    //    console.log(content);
+
+    //    if (Array.isArray(content)) {
+    //      // ✅ Multiple inputs (store as array)
+    //      content.forEach((item) => {
+    //        const fieldDiv = document.createElement("div");
+    //        fieldDiv.className = "input-group mb-3";
+    //        fieldDiv.innerHTML = `
+    //                    <input type="text" class="form-control summary-input" name="${sectionName}Text" value="${item}" required />
+    //                    <button class="btn btn-danger btn-sm" type="button" onclick="this.parentNode.remove()">
+    //                        <i class="bi bi-x-square-fill"></i>
+    //                    </button>
+    //                `;
+    //        summaryItemsContainer.appendChild(fieldDiv);
+    //      });
+    //    } else {
+    //      // ✅ Single textarea (store as string)
+    //      const fieldDiv = document.createElement("div");
+    //      fieldDiv.className = "input-group mb-3";
+    //      fieldDiv.innerHTML = `
+    //                <textarea class="form-control summary-textarea" name="${sectionName}Area" rows="3" required>${content}</textarea>
+    //            `;
+    //      summaryItemsContainer.appendChild(fieldDiv);
+
+    //      // Disable "Add Item" button when using a textarea
+    //      const addButton = section.querySelector(".add-item-btn");
+    //      if (addButton) addButton.disabled = true;
+    //    }
+    //  } else {
+    //    // ❌ Section NOT in JSON → Disable it
+    //    toggleSection(originalTitle, false);
+    //  }
+    //});
+    // ✅ Populate Summary Section
+    //if (data.summary) {
+    //  Object.entries(data.summary).forEach(([sectionName, content]) => {
+    //    const sectionContainer = document.querySelector(`[data-section="${sectionName}"]`);
+    //    if (!sectionContainer) {
+    //      console.warn(`⚠️ Section not found in DOM: ${sectionName}`);
+    //      return;
+    //    }
+
+    //    const summaryItemsContainer = sectionContainer.querySelector(".summary-items");
+    //    summaryItemsContainer.innerHTML = ""; // Clear existing items
+
+    //    if (Array.isArray(content)) {
+    //      // Multiple inputs -> Append as array
+    //      content.forEach((item) => {
+    //        const fieldDiv = document.createElement("div");
+    //        fieldDiv.className = "input-group mb-3";
+    //        fieldDiv.innerHTML = `
+    //                    <input type="text" class="form-control summary-input" name="${sectionName}Text" value="${item}" required />
+    //                    <button class="btn btn-danger btn-sm" type="button" onclick="this.parentNode.remove()">
+    //                        <i class="bi bi-x-square-fill"></i>
+    //                    </button>
+    //                `;
+    //        summaryItemsContainer.appendChild(fieldDiv);
+    //      });
+    //    } else {
+    //      // Single string (textarea) -> Show only one
+    //      const fieldDiv = document.createElement("div");
+    //      fieldDiv.className = "input-group mb-3";
+    //      fieldDiv.innerHTML = `
+    //                <textarea class="form-control summary-textarea" name="${sectionName}Area" rows="3" required>${content}</textarea>
+    //            `;
+    //      summaryItemsContainer.appendChild(fieldDiv);
+
+    //      // Disable "Add Item" button since only one textarea should be allowed
+    //      const addButton = sectionContainer.querySelector(".add-item-btn");
+    //      if (addButton) {
+    //        addButton.disabled = true;
+    //      }
+    //    }
+    //  });
+    //}
 
     // Handle investment sections (dynamically create missing sections and items)
     if (data.invest) {
@@ -549,7 +755,8 @@
 
     // Include dynamic sections (Equipment, Summary, Investment)
     data.equip = {};
-    data.summary = {Objectives: formData.get('summaryObjective'), Solutions: []};
+    //data.summary = {Objectives: formData.get('summaryObjective'), Solutions: []};
+    data.summary = {};
     data.invest = {};
 
     // Process Equipment Section
@@ -567,10 +774,57 @@
     });
 
     // Process Summary Section
-    document.querySelectorAll('[name="summarySolution"]').forEach((input) => {
-      const solution = input.value.trim();
-      if (solution) {
-        data.summary.Solutions.push(solution);
+    //document.querySelectorAll('[name="summarySolution"]').forEach((input) => {
+    //  const solution = input.value.trim();
+    //  if (solution) {
+    //    data.summary.Solutions.push(solution);
+    //  }
+    //});
+
+    //// Select all dynamically added summary sections
+    const summarySections = document.querySelectorAll(".sum-section");
+
+    //summarySections.forEach((section) => {
+    //  const summaryName = section.querySelector('input.section-title')?.value.trim(); // ✅ Get section name
+    //  if (!summaryName) return; // Skip if empty
+
+    //  const items = Array.from(section.querySelectorAll(".summary-input, .summary-textarea"))
+    //    .map((item) => item.value.trim())
+    //    .filter((item) => item.length > 0); // ✅ Collect all non-empty summary items
+
+    //  console.log(`🔹 Summary Name: ${summaryName}, Items:`, items); // Debugging
+
+    //  if (!data.summary) data.summary = {}; // ✅ Ensure summary object exists
+
+    //  if (items.length > 0) {
+    //    // ✅ If multiple items exist, store as array
+    //    data.summary[summaryName] = items.length === 1 ? items[0] : items;
+    //  }
+    //});
+
+    summarySections.forEach((section) => {
+      const summaryName = section.querySelector("input.section-title")?.value.trim(); // ✅ Get section name
+      if (!summaryName) return; // Skip if empty
+
+      let textValue = ""; // Store textarea content
+      let inputValues = []; // Store input values as an array
+
+      // ✅ Find all input & textarea fields that are not disabled
+      section.querySelectorAll(".summary-input, .summary-textarea").forEach((field) => {
+        if (field.tagName === "TEXTAREA" && field.value.trim()) {
+          textValue = field.value.trim(); // Store textarea content as string
+        } else if (field.tagName === "INPUT" && field.value.trim()) {
+          inputValues.push(field.value.trim()); // Store input values as array
+        }
+      });
+
+      if (!data.summary) data.summary = {}; // ✅ Ensure summary object exists
+
+      // ✅ Store textarea as string & inputs as array
+      if (textValue) {
+        data.summary[summaryName] = textValue; // Store textarea value as string
+      } else if (inputValues.length > 0) {
+        data.summary[summaryName] = inputValues; // Store inputs as an array
       }
     });
 
@@ -611,74 +865,393 @@
   var currentTab = 0; // Current tab is set to be the first tab (0)
   showTab(currentTab); // Display the current tab
 
+  //function showTab(n) {
+  //  // This function will display the specified tab of the form ...
+  //  var x = document.getElementsByClassName("tab");
+  //  x[n].style.display = "block";
+  //  // ... and fix the Previous/Next buttons:
+  //  if (n == 0) {
+  //    document.getElementById("prevBtn").style.display = "none";
+  //  } else {
+  //    document.getElementById("prevBtn").style.display = "inline";
+  //  }
+  //  if (n == (x.length - 1)) {
+  //    document.getElementById("nextBtn").style.display = "none";
+  //  } else {
+  //    x[n].style.display = "block";
+  //    document.getElementById("nextBtn").style.display = "inline";
+  //    document.getElementById("nextBtn").innerHTML = "Next";
+  //  }
+  //  // ... and run a function that displays the correct step indicator:
+  //  //fixStepIndicator(n)
+  //}
+
   function showTab(n) {
-    // This function will display the specified tab of the form ...
-    var x = document.getElementsByClassName("tab");
-    x[n].style.display = "block";
-    // ... and fix the Previous/Next buttons:
-    if (n == 0) {
-      document.getElementById("prevBtn").style.display = "none";
-    } else {
-      document.getElementById("prevBtn").style.display = "inline";
+    var tabs = document.getElementsByClassName("tab");
+
+    for (var i = 0; i < tabs.length; i++) {
+      tabs[i].style.display = "none";
     }
-    if (n == (x.length - 1)) {
-      document.getElementById("nextBtn").style.display = "none";
-    } else {
-      document.getElementById("nextBtn").style.display = "inline";
-      document.getElementById("nextBtn").innerHTML = "Next";
-    }
-    // ... and run a function that displays the correct step indicator:
-    fixStepIndicator(n)
+
+    tabs[n].style.display = "block";
+
+    // Control visibility of Prev and Next buttons
+    document.getElementById("prevBtn").style.display = (n === 0) ? "none" : "inline";
+    document.getElementById("nextBtn").style.display = (n === tabs.length - 1) ? "none" : "inline";
+
+    // Show Generate PDF button only on the last tab
+    document.getElementById("generate-pdf").style.display = (n === tabs.length - 1) ? "inline" : "none";
+    document.getElementById("generate-json").style.display = (n === tabs.length - 1) ? "inline" : "none";
   }
 
   function nextPrev(n) {
-    // This function will figure out which tab to display
-    var x = document.getElementsByClassName("tab");
-    // Exit the function if any field in the current tab is invalid:
+    var tabs = document.getElementsByClassName("tab");
+
+    // Exit if validation fails
     if (n == 1 && !validateForm()) return false;
-    // Hide the current tab:
-    x[currentTab].style.display = "none";
-    // Increase or decrease the current tab by 1:
-    currentTab = currentTab + n;
-    // if you have reached the end of the form... :
-    if (currentTab >= x.length) {
-      //...the form gets submitted:
-      document.getElementById("regForm").submit();
-      return false;
-    }
-    // Otherwise, display the correct tab:
+
+    // Hide the current tab
+    tabs[currentTab].style.display = "none";
+
+    // Change current tab index
+    currentTab += n;
+
+    // Ensure index doesn't go out of bounds
+    if (currentTab < 0) currentTab = 0;
+    if (currentTab >= tabs.length) currentTab = tabs.length - 1;
+
+    // Show the updated tab
     showTab(currentTab);
   }
 
+  //function nextPrev(n) {
+  //  // This function will figure out which tab to display
+  //  var x = document.getElementsByClassName("tab");
+  //  // Exit the function if any field in the current tab is invalid:
+  //  if (n == 1 && !validateForm()) return false;
+  //  // Hide the current tab:
+  //  x[currentTab].style.display = "none";
+  //  // Increase or decrease the current tab by 1:
+  //  currentTab += n;
+  //  // if you have reached the end of the form... :
+  //  //if (currentTab >= x.length) {
+  //  //  //...the form gets submitted:
+  //  //  document.getElementById("regForm").submit();
+  //  //  return false;
+  //  //}
+  //  // Otherwise, display the correct tab:
+  //  if (currentTab < 0) {currentTab = 0;}
+  //  if (currentTab <= x.length) {currentTab = x.length - 1;}
+  //  showTab(currentTab);
+  //}
+
+  //function validateForm() {
+  //  var tabs = document.getElementsByClassName("tab");
+  //  var inputs = tabs[currentTab].querySelectorAll("input, textarea");
+  //  var valid = true;
+  //  console.log('Current Summary Inputs: ' + inputs);
+
+  //  inputs.forEach((input) => {
+  //    if (input.value.trim() === "") {
+  //      input.classList.add("invalid"); // Add invalid styling
+  //      valid = false;
+  //    } else {
+  //      input.classList.remove("invalid"); // Remove invalid styling if corrected
+  //    }
+  //  });
+
+  //  return valid;
+  //}
+
+  //function validateForm() {
+  //  // This function deals with validation of the form fields
+  //  var x, y, i, valid = true;
+  //  x = document.getElementsByClassName("tab");
+  //  y = x[currentTab].getElementsByTagName("input");
+  //  // A loop that checks every input field in the current tab:
+  //  for (i = 0; i < y.length; i++) {
+  //    // If a field is empty...
+  //    if (y[i].value == "") {
+  //      // add an "invalid" class to the field:
+  //      y[i].className += " invalid";
+  //      // and set the current valid status to false:
+  //      valid = false;
+  //    }
+  //  }
+  //  // If the valid status is true, mark the step as finished and valid:
+  //  //if (valid) {
+  //  //  document.getElementsByClassName("step")[currentTab].className += " finish";
+  //  //}
+  //  //return valid; // return the valid status
+  //}
+
+  //function fixStepIndicator(n) {
+  //  // This function removes the "active" class of all steps...
+  //  var i, x = document.getElementsByClassName("step");
+  //  for (i = 0; i < x.length; i++) {
+  //    x[i].className = x[i].className.replace(" active", "");
+  //  }
+  //  //... and adds the "active" class to the current step:
+  //  x[n].className += " active";
+  //}
+
+  // Function that will show all summary fields if the summary checkbox is included in the page selection
+  //function toggleSummaryFields() {
+  //  var summary = document.getElementById('sumpg');
+  //  var divId = document.getElementById('step3');
+  //  var tmp = '';
+
+  //  if (summary.checked && document.getElementById('summary').id === 'summary') {
+  //    tmp = divId.id;
+  //    divId.id = 'step4';
+  //    document.getElementById('summary').id = tmp;
+  //  } else if (summary.checked && divId.id === 'step3') {
+  //    divId.style.display = 'block';
+  //  } else {
+  //    divId.id = 'summary';
+  //    document.getElementById('step4').id = 'step3';
+  //  }
+  //}
+
+  //function validateForm() {
+  //  var tabs = document.getElementsByClassName("tab");
+  //  var currentSection = tabs[currentTab]; // Get current section
+  //  var inputs = currentSection.querySelectorAll("input:not([disabled]), textarea:not([disabled])");
+  //  var valid = true;
+
+  //  console.log('Validating Inputs:', inputs.length);
+
+  //  // Convert NodeList to an Array (for compatibility)
+  //  Array.from(inputs).forEach((input) => {
+  //    if (input.value.trim() === "") {
+  //      input.classList.add("invalid"); // Add invalid styling
+  //      valid = false;
+  //    } else {
+  //      input.classList.remove("invalid"); // Remove invalid styling if corrected
+  //    }
+  //  });
+
+  //  // 🎯 Ensure that **disabled titles** in summary sections are validated
+  //  var disabledTitles = currentSection.querySelectorAll("input[disabled]");
+  //  Array.from(disabledTitles).forEach((title) => {
+  //    if (title.value.trim() === "") {
+  //      title.classList.add("invalid"); // Mark as invalid
+  //      valid = false;
+  //    } else {
+  //      title.classList.remove("invalid"); // Remove invalid styling
+  //    }
+  //  });
+
+  //  return valid;
+  //}
+
   function validateForm() {
-    // This function deals with validation of the form fields
-    var x, y, i, valid = true;
-    x = document.getElementsByClassName("tab");
-    y = x[currentTab].getElementsByTagName("input");
-    // A loop that checks every input field in the current tab:
-    for (i = 0; i < y.length; i++) {
-      // If a field is empty...
-      if (y[i].value == "") {
-        // add an "invalid" class to the field:
-        y[i].className += " invalid";
-        // and set the current valid status to false:
-        valid = false;
+    var tabs = document.getElementsByClassName("tab");
+    var currentSection = tabs[currentTab]; // Get current section
+    var valid = true;
+
+    // 🟢 Select only enabled fields (either input or textarea)
+    var fields = currentSection.querySelectorAll(".input-group");
+
+    fields.forEach((group, index) => {
+      // 🟢 Get the active (visible) input OR textarea inside the group
+      var activeField = group.querySelector("input:not([disabled]), textarea:not([disabled])");
+
+      if (activeField) {
+        if (activeField.value.trim() === "") {
+          activeField.classList.add("invalid"); // Add invalid styling
+          valid = false;
+          console.warn(`❌ Empty field detected: ${activeField.name || `Field #${index}`}`);
+        } else {
+          activeField.classList.remove("invalid"); // Remove invalid styling if corrected
+        }
+      } else {
+        console.warn(`⚠️ No active input found in field group ${index}`);
       }
-    }
-    // If the valid status is true, mark the step as finished and valid:
-    if (valid) {
-      document.getElementsByClassName("step")[currentTab].className += " finish";
-    }
-    return valid; // return the valid status
+    });
+
+    console.log(valid ? "✅ Validation Passed" : "⛔ Validation Failed");
+    return valid;
   }
 
-  function fixStepIndicator(n) {
-    // This function removes the "active" class of all steps...
-    var i, x = document.getElementsByClassName("step");
-    for (i = 0; i < x.length; i++) {
-      x[i].className = x[i].className.replace(" active", "");
+  function addField(button, isParagraph) {
+    const section = button.closest(".sum-section");
+    const container = section.querySelector(".summary-items");
+
+    if (!container) {
+      console.error("Could not find the correct summary-items container.");
+      return;
     }
-    //... and adds the "active" class to the current step:
-    x[n].className += " active";
+
+    const sectionTitle = button.closest('.sum-section').querySelector('input.section-title').value.trim();
+    const sectionKey = sectionTitle.toLowerCase().replace(/\s+/g, '_');
+
+    if (isParagraph) {
+      // Prevent adding multiple textareas
+      if (container.querySelector(".summary-textarea")) {
+        alert("Only one paragraph is allowed.");
+        return;
+      }
+
+      const fieldDiv = document.createElement("div");
+      fieldDiv.className = "input-group mb-2";
+      fieldDiv.innerHTML = `
+      <textarea class="form-control summary-textarea" name="${sectionKey}Area" rows="3" required></textarea>
+    `;
+
+      container.appendChild(fieldDiv);
+    } else {
+      const fieldDiv = document.createElement("div");
+      fieldDiv.className = "input-group mb-2";
+      fieldDiv.innerHTML = `
+      <span class="input-group-text">Item</span>
+      <input type="text" class="form-control summary-input" name="${sectionKey}Text" required />
+      <button class="btn btn-danger" type="button" onclick="this.parentNode.remove()">
+          <i class="bi bi-x-square-fill"></i>
+      </button>
+    `;
+
+      container.appendChild(fieldDiv);
+    }
   }
+
+  // Allow users to edit section names
+  function editSectionName(button) {
+    var section = button.closest('.sum-section');
+    var titleInput = section.querySelector('.section-title');
+
+    titleInput.removeAttribute('disabled');
+    button.style.display = 'none';
+    section.querySelector('.btn-success').style.display = 'inline';
+  }
+
+  // Save section name after editing
+  function saveSectionName(button) {
+    var section = button.closest('.sum-section');
+    var titleInput = section.querySelector('.section-title');
+
+    titleInput.setAttribute('disabled', 'true');
+    button.style.display = 'none';
+    section.querySelector('.btn-secondary').style.display = 'inline';
+  }
+
+  // Toggle input/textarea fields dynamically
+  function togglePar(section, isPar) {
+    const sectionContainer = document.querySelector(`.sum-section input[value="${section}"]`)?.closest('.sum-section');
+
+    if (!sectionContainer) {
+      console.error("Section not found:", section);
+      return;
+    }
+
+    const fieldsContainer = sectionContainer.querySelector(".summary-items");
+    const addButton = sectionContainer.querySelector(".add-item-btn");
+
+    if (!fieldsContainer) {
+      console.error("Fields container not found for:", section);
+      return;
+    }
+
+    fieldsContainer.innerHTML = ""; // Clear all existing inputs
+
+
+    const fieldDiv = document.createElement("div");
+    fieldDiv.className = "input-group mb-3";
+
+    if (isPar) {
+      // Ensure only one textarea is allowed
+      fieldDiv.innerHTML = `
+      <textarea class="form-control summary-textarea" name="${section.toLowerCase()}Area" rows="3" required></textarea>
+    `;
+      addButton.disabled = true;
+    } else {
+      fieldDiv.innerHTML = `
+      <input type="text" class="form-control summary-input" name="${section.toLowerCase()}Text" required />
+    `;
+      addButton.disabled = false;
+    }
+
+    fieldsContainer.appendChild(fieldDiv);
+  }
+
+  function toggleSection(section, isEnabled) {
+    console.log(`🔹 Toggling section: ${section} -> ${isEnabled ? "Enabled" : "Disabled"}`);
+
+    // Find the correct section container dynamically
+    const sectionContainer = document.querySelector(`[data-section="${section}"]`);
+
+    if (!sectionContainer) {
+      console.error(`❌ Section container not found for: ${section}`);
+      return; // Exit to prevent further errors
+    }
+
+    // Get all inputs, textareas, and buttons within the section
+    const inputs = sectionContainer.querySelectorAll("input, textarea, button");
+    const addButton = sectionContainer.querySelector(".add-item-btn");
+    const titleInput = sectionContainer.querySelector(".section-title"); // Title should remain disabled
+
+    // Enable or disable all fields inside the section (except the title)
+    inputs.forEach((el) => {
+      if (!el.classList.contains("section-title") && !el.classList.contains("dropdown-toggle")) {
+        el.disabled = !isEnabled;
+      }
+    });
+
+    // Ensure "Add Item" button is properly disabled when the section is disabled
+    if (addButton) {
+      addButton.disabled = !isEnabled;
+    }
+
+    // Ensure title remains disabled
+    if (titleInput) {
+      titleInput.disabled = true;
+    }
+
+    // Update dropdown items visibility
+    const dropdownItems = sectionContainer.querySelectorAll(".enable-toggle");
+    dropdownItems.forEach((item) => {
+      const isEnableOption = item.textContent.includes("Enable");
+      if (isEnableOption === isEnabled) {
+        item.classList.add("disabled");
+        item.setAttribute("aria-disabled", "true");
+        item.style.pointerEvents = "none"; // Prevent click events
+      } else {
+        item.classList.remove("disabled");
+        item.removeAttribute("aria-disabled");
+        item.style.pointerEvents = "auto"; // Allow click events
+      }
+    });
+
+    // Store enabled state for JSON processing
+    sectionContainer.dataset.enabled = isEnabled;
+  }
+  ///** Function to dynamically disable the "Enable" option */
+  //function disableEnableOption(section, isEnabled) {
+  //  const dropdownItems = document.querySelectorAll(`#${section}SectionTitle .dropdown-menu .dropdown-item`);
+
+  //  dropdownItems.forEach(item => {
+  //    if (item.textContent.includes("Enable")) {
+  //      item.classList.toggle("disabled", isEnabled);
+  //    } else if (item.textContent.includes("Disable")) {
+  //      item.classList.toggle("disabled", !isEnabled);
+  //    }
+  //  });
+  //}
+
+  document.getElementById("summaryBool").addEventListener("change", function () {
+    const sumSection = document.getElementById("summary-section");
+    const isEnabled = this.checked;
+
+    const fields = sumSection.querySelectorAll("input:not(.section-title), textarea, button");
+    fields.forEach(field => {field.disabled = !isEnabled;});
+  });
+
+  document.getElementById("equipBool").addEventListener("change", function () {
+    const equipSection = document.getElementById("equipment-section");
+    const isEnabled = this.checked;
+
+    const fields = equipSection.querySelectorAll("input, textarea, button");
+    fields.forEach(field => {field.disabled = !isEnabled;});
+  });
+
 </script>
