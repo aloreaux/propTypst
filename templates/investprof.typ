@@ -89,7 +89,7 @@
   } else if (mhec.get()) {
     align(left)[#text(size: 14pt)[*Contract: MC12-C07*]]
   } else if (ny.get()) {
-    align(left)[#text(size: 14pt)[*Group: 20915*\ *Vendor Code: 23109*]]
+    align(left)[#text(size: 14pt)[*Group: 20915*\ *Award: 23295*]]
   }
 }
 #pagebreak()
