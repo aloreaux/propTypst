@@ -56,6 +56,7 @@ app.post("/generate-pdf", async (req, res) => {
   docForm.quoteBool = !!docForm.quoteBool;
   docForm.summaryBool = !!docForm.summaryBool;
   docForm.equipBool = !!docForm.equipBool;
+  docForm.serviceBool = !!docForm.serviceBool;
   docForm.lumpBool = !!docForm.lumpBool;
   docForm.off52 = !!docForm.off52;
   docForm.fac126 = !!docForm.fac126;

@@ -854,6 +854,14 @@
     const fields = equipSection.querySelectorAll("input, textarea, button");
     fields.forEach(field => {field.disabled = !isEnabled;});
   });
+
+  document.getElementById("serviceBool").addEventListener("change", function () {
+    const serviceSection = document.getElementById("service-section");
+    const isEnabled = this.checked;
+
+    const fields = serviceSection.querySelectorAll("input, textarea, button");
+    fields.forEach(field => {field.disabled = !isEnabled;});
+  });
  
   document.getElementById('img-category').addEventListener('change', async (event) => {
     const category = event.target.value;

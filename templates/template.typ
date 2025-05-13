@@ -56,6 +56,14 @@
     marketCat.update(cat)
 }
 
+#let service(
+  quantity: none,
+  carriage: none,
+) = {
+  quantity-state.update(quantity)
+  carriageCost.update(carriage)
+}
+
 #let conf(
     cornerimgpath: none,
     equip: none,

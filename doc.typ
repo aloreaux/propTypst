@@ -28,8 +28,6 @@
   equip: $equip$,
   summary: $summary$,
   invest: $invest$,
-  quantity: $quantity$,
-  carriage: $carriage$,
   lump: $lumpBool$,
   off52Bool: $off52$,
   fac126Bool: $fac126$,
@@ -61,6 +59,12 @@
 
 #include "/templates/contract.typ"
 
-#include "/templates/service.typ"
+#if ($serviceBool$) {
+  service(
+    quantity: $quantity$,
+    carriage: $carriage$,
+  )
+  include "/templates/service.typ"
+}
 
 = Appendix
