@@ -1,18 +1,14 @@
 #import "template.typ": *
 
-#set heading(numbering: (..nums) => {
-  let sequence = nums.pos()
-  // discard first entry (chapter number)
-  let _ = sequence.remove(0)
-})
+#set heading(numbering: none)
 
-#show heading.where(level: 2): it => [
+#show heading.where(level: 1): it => [
     #set align(right)
     #set text(font: "Concourse C2", weight: "regular", size: 24pt)
     #block(it.body)
 ]
 
-== Summary
+= Summary
 
 #v(1fr)
 
