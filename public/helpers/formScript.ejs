@@ -211,7 +211,7 @@
       link.href = URL.createObjectURL(jsonBlob);
       link.download = `${(data.title || "generated").replace(/[^a-zA-Z0-9-_]/g, "_").substring(0, 50)}.json`;
 
-      const handleBlur = () => {
+      /*const handleBlur = () => {
         downloadTriggered = true;
       };
       window.addEventListener("blur", handleBlur);
@@ -231,11 +231,10 @@
         }
 
         downloadTriggered = false;
-      }, 1000);
-      /*jsonGenerated = true;
-      if (pdfBtn) {
-        pdfBtn.disabled = false;
-      }*/
+      }, 1000);*/
+      jsonGenerated = true;
+      pdfBtn?.removeAttribute("disabled");
+      link.click();
     });
   }
 
