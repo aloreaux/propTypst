@@ -13,7 +13,7 @@
 #set text(font: "Concourse T2", size: 16pt)
 
 #set page(
-    margin: (top: 2.125in, bottom: 2in, left: 1in, right: 1in),
+    margin: (top: 2in, bottom: 2in, left: 1in, right: 1in),
     fill: donn-blue,
 )
 
