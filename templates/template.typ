@@ -24,6 +24,7 @@
 #let quantity-state = state("quantity", "")
 #let carriageCost = state("carriageCost", "")
 #let lumpSumBool = state("lumpSumBool", "")
+#let marketCat = state("marketCat", "")
 #let off52 = state("off52", "")
 #let fac126 = state("fac126", "")
 #let gsa71 = state("gsa71", "")
@@ -41,6 +42,7 @@
     zip: none,
     ext: none,
     cell: none,
+    cat: none,
 ) = {
     title-state.update(title)
     author-state.update(author)
@@ -51,10 +53,11 @@
     zip-state.update(zip)
     ext-state.update(ext)
     cell-state.update(cell)
+    marketCat.update(cat)
 }
 
 #let conf(
-    imgpath: none,
+    cornerimgpath: none,
     equip: none,
     summary: none,
     invest: none,
@@ -88,7 +91,7 @@
             place(
                 dx: -15.5%,
                 image(
-                    imgpath,
+                    cornerimgpath,
                     width: 10%
                 )
         )
@@ -182,8 +185,10 @@
             bottom + left,
             image(
                 imgpath,
-                width: 612pt,
-                height: 918.238pt
+                width: 8.5in,
+                height: 11in
+                //width: 612pt,
+                //height: 918.238pt
             )
         )
     )
