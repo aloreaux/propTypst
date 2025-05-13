@@ -209,6 +209,10 @@ function isTypstDictionaryString(value) {
   );
 }
 
+function escapeTypstString(str) {
+  return str.replace(/"/g, '\\"');
+}
+
 function convertJsonToTypstDict(jsonObject) {
   const formatValue = (value) => {
     if (Array.isArray(value)) {
@@ -222,7 +226,7 @@ function convertJsonToTypstDict(jsonObject) {
       }
     } else if (typeof value === "string") {
       // Wrap strings in double quotes
-      return `"${value}"`;
+      return `"${escapeTypstString(value)}"`;
     } else if (typeof value === "number") {
       // Keep numbers as-is
       return `"${value}"`;
