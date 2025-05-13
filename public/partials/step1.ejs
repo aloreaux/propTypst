@@ -1,18 +1,24 @@
 <!--TODO: Have to make multi steps, this is step 1, for images -->
 <div class="row g-3">
   <div class="col-md-6 pe-5 border-end">
-    <label for="imgpath" class="form-label">Select Image</label>
-    <select id="imgpath" name="imgpath" class="form-select">
-      <option value="assets/business/business.jpg">Business</option>
-      <option value="assets/grow/grow.jpg">Grow</option>
-      <option value="assets/healthcare/health.jpg">Healthcare</option>
-      <option value="assets/higheredu/edu.jpg">Higher Edu</option>
-      <option value="assets/industrial/industrial.jpg">Industrial</option>
-      <option value="assets/military/military.jpg">Military</option>
-      <option value="assets/museum/museum.jpg">Museum</option>
-      <option value="assets/publicsafety/publicsafety.jpg">Public Safety</option>
-    </select>
+    <label for="img-category" class="form-label">Select Market</label>
+    <select id="img-category" name="img-category" class="form-select">
+      <option value="athletics">Athletics</option>
+      <option value="business">Business</option>
+      <option value="firedept">Fire Department</option>
+      <option value="grow">Grow</option>
+      <option value="healthcare">Healthcare</option>
+      <option value="higheredu">Higher Edu</option>
+      <option value="industrial">Industrial</option>
+      <option value="military">Military</option>
+      <option value="museum">Museum</option>
+      <option value="publicsafety">Public Safety</option>
+    </select> 
+
+    <input type="hidden" name="imgpath" id="imgpath" />
+    <div id="thumbnail-container" class="d-flex flex-wrap gap-2 mt-3"></div>
   </div>
+
   <div class="col-md-6 px-5">
     <div class="row">
       <div class="col-md-6">
