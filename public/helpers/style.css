@@ -29,3 +29,13 @@ textarea.form-control {
 .step.finish {
   background-color: #04AA6D;
 }
+
+.thumbnail {
+  border: 2px solid transparent;
+  border-radius: 5px;
+  object-fit: cover;
+}
+
+.thumbnail.selected {
+  border-color: #007bff;
+}
