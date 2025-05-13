@@ -1,48 +1,50 @@
 #import "/templates/template.typ": *
+#set page("us-letter")
 
 #setup(
-    title: $title$,
-    author: $author$,
-    customer: $customer$,
-    address: $address$,
-    city: $city$,
-    state: $state$,
-    zip: $zip$,
-    ext: $extension$,
-    cell: $cell$,
+  title: $title$,
+  author: $author$,
+  customer: $customer$,
+  address: $address$,
+  city: $city$,
+  state: $state$,
+  zip: $zip$,
+  ext: $extension$,
+  cell: $cell$,
+  cat: $imgcategory$,
 )
 
 #makecover(
-    imgpath: $imgpath$,
+  imgpath: $imgpath$,
 )
 
 #include "/templates/corporate.typ"
 #if ($quoteBool$) {
-    include "/templates/quote.typ"
+  include "/templates/quote.typ"
 }
 
 #show: conf.with(
-    imgpath: $cornerimg$,
-    equip: $equip$,
-    summary: $summary$,
-    invest: $invest$,
-    quantity: $quantity$,
-    carriage: $carriage$,
-    lump: $lumpBool$,
-    off52Bool: $off52$,
-    fac126Bool: $fac126$,
-    gsa71Bool: $gsa71$,
-    gsa84Bool: $gsa84$,
-    mhecBool: $mhec$,
-    nyBool: $ny$,
+  cornerimgpath: $cornerimg$,
+  equip: $equip$,
+  summary: $summary$,
+  invest: $invest$,
+  quantity: $quantity$,
+  carriage: $carriage$,
+  lump: $lumpBool$,
+  off52Bool: $off52$,
+  fac126Bool: $fac126$,
+  gsa71Bool: $gsa71$,
+  gsa84Bool: $gsa84$,
+  mhecBool: $mhec$,
+  nyBool: $ny$,
 )
 #include "/templates/cover.typ"
 
 #if ($summaryBool$) {
-    include "/templates/summary.typ"
+  include "/templates/summary.typ"
 }
 
-#outline(indent: true)
+#outline(title: [Contents #v(2em)])
 #pagebreak()
 
 #if ($equipBool$) {
