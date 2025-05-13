@@ -5,7 +5,7 @@
   <%- include('../partials/head.ejs'); %>
 </head>
 
-<body class="d-flex flex-column h-100">
+<body body-data="form" class="d-flex flex-column h-100">
   <header>
     <%- include('../partials/header.ejs'); %>
   </header>
@@ -19,135 +19,6 @@
         <div class="tab">
           <%- include('../partials/step2.ejs'); %>
         </div>
-        <!--<h2 class="mb-4">Basic Information</h2>
-<div class="row g-3">
-<div class="col-md-6">
-<label for="title" class="form-label">Title</label>
-<input type="text" id="title" name="title" class="form-control" placeholder="Enter title"
-required />
-</div>
-<div class="col-md-6">
-<label for="author" class="form-label">Author</label>
-<input type="text" id="author" name="author" class="form-control" placeholder="Enter author"
-required />
-</div>
-<div class="col-md-6">
-<label for="customer" class="form-label">Customer Name</label>
-<input type="text" id="customer" name="customer" class="form-control"
-placeholder="Enter customer name" required />
-</div>
-<div class="col-md-6">
-<label for="address" class="form-label">Address</label>
-<input type="text" id="address" name="address" class="form-control" placeholder="Enter address"
-required />
-</div>
-<div class="col-md-4">
-<label for="city" class="form-label">City</label>
-<input type="text" id="city" name="city" class="form-control" placeholder="Enter city" required />
-</div>
-<div class="col-md-4">
-<label for="state" class="form-label">State</label>
-<input type="text" id="state" name="state" class="form-control" placeholder="Enter state"
-required />
-</div>
-<div class="col-md-4">
-<label for="zip" class="form-label">Zip</label>
-<input type="text" id="zip" name="zip" class="form-control" placeholder="Enter zip" required />
-</div>
-<div class="col-md-4">
-<label for="extension" class="form-label">Extension</label>
-<input type="text" id="extension" name="extension" class="form-control"
-placeholder="Enter extension" required />
-</div>
-<div class="col-md-4">
-<label for="cell" class="form-label">Cell</label>
-<input type="text" id="cell" name="cell" class="form-control" placeholder="Enter cell #" required />
-</div>
-<div class="col-md-4">
-<label for="quantity" class="form-label">Carriage Quantity</label>
-<input type="text" id="quantity" name="quantity" class="form-control" placeholder="# of carriages"
-required />
-</div>
-<div class="col-md-6">
-<label for="carriage" class="form-label">Service Cost</label>
-<input type="text" id="carriage" name="carriage" class="form-control"
-placeholder="Cost per carriage" required />
-</div>
-<div class="col-md-6">
-<label for="imgpath" class="form-label">Select Image</label>
-<select id="imgpath" name="imgpath" class="form-select">
-<option value="assets/business/business.jpg">Business</option>
-<option value="assets/grow/grow.jpg">Grow</option>
-<option value="assets/healthcare/health.jpg">Healthcare</option>
-<option value="assets/higheredu/edu.jpg">Higher Edu</option>
-<option value="assets/industrial/industrial.jpg">Industrial</option>
-<option value="assets/military/military.jpg">Military</option>
-<option value="assets/museum/museum.jpg">Museum</option>
-<option value="assets/publicsafety/publicsafety.jpg">Public Safety</option>
-</select>
-</div>
-<div class="col-md-6 form-check">
-<input type="checkbox" class="form-check-input" id="quoteBool" name="quoteBool" />
-<label for="quoteBool" class="form-check-label">Include Quote Section</label>
-</div>
-<div class="col-md-6 form-check">
-<input type="checkbox" class="form-check-input" id="summaryBool" name="summaryBool" />
-<label for="summaryBool" class="form-check-label">Include Summary Section</label>
-</div>
-<div class="col-md-6 form-check">
-<input type="checkbox" class="form-check-input" id="lumpBool" name="lumpBool" />
-<label for="lumpBool" class="form-check-label">Include Lump Sum</label>
-</div>
-<div class="col-md-6 form-check">
-<input type="checkbox" class="contracts form-check-input" id="off52" name="off52" />
-<label for="off52" class="form-check-label">OFF-52</label>
-</div>
-<div class="col-md-6 form-check">
-<input type="checkbox" class="contracts form-check-input" id="fac126" name="fac126" />
-<label for="fac126" class="form-check-label">FAC-126</label>
-</div>
-<div class="col-md-6 form-check">
-<input type="checkbox" class="contracts form-check-input" id="gsa71" name="gsa71" />
-<label for="gsa71" class="form-check-label">GSA-71</label>
-</div>
-<div class="col-md-6 form-check">
-<input type="checkbox" class="contracts form-check-input" id="gsa84" name="gsa84" />
-<label for="gsa84" class="form-check-label">GSA-84</label>
-</div>
-<div class="col-md-6 form-check">
-<input type="checkbox" class="contracts form-check-input" id="mhec" name="mhec" />
-<label for="mhec" class="form-check-label">MHEC</label>
-</div>
-<div class="col-md-6 form-check">
-<input type="checkbox" class="contracts form-check-input" id="ny" name="ny" />
-<label for="ny" class="form-check-label">NY STATE</label>
-</div>
-</div>-->
-
-        <!-- Dynamic Equipment Section --
-<h2 class="mt-4 mb-3">Equipment</h2>
-<div id="equipment-section" class="mb-3">
-<button type="button" class="btn btn-primary" onclick="addEquipSection()">Add Room</button>
-</div>-->
-
-        <!-- Dynamic Summary Section --
-<h2 class="mt-4 mb-3">Summary</h2>
-<div id="summary-section" class="mb-3">
-<div class="mb-3">
-<label for="summaryObjective" class="form-label">Objective</label>
-<textarea name="summaryObjective" id="summaryObjective" class="form-control"></textarea>
-</div>
-<div id="summary-solutions"></div>
-<button type="button" class="btn btn-primary" onclick="addSummarySolution()">Add Solution</button>
-</div>-->
-
-        <!-- Dynamic Investment Section --
-<h2 class="mt-4 mb-3">Investment</h2>
-<div id="investment-section">
-<button type="button" class="btn btn-primary mb-3" onclick="addInvestSection()">Add Investment
-Section</button>
-<div id="investment-container"></div>
-</div>-->
         <div class="tab">
           <%- include('../partials/step3.ejs'); %>
         </div>
@@ -160,22 +31,6 @@ Section</button>
           <%- include('../partials/step5.ejs'); %>
         </div>
 
-        <!--<div style="overflow:auto;">
-          <div style="float:right;">
-            <button type="button" class="btn btn-primary" id="prevBtn" onclick="nextPrev(-1)">Previous</button>
-            <button type="button" class="btn btn-primary" id="nextBtn" onclick="nextPrev(1)">Next</button>
-          </div>
-        </div>-->
-
-        <!-- Circles which indicates the steps of the form: -->
-        <!--<div style="text-align:center;margin-top:40px;display:none;">
-          <span class="step"></span>
-          <span class="step"></span>
-          <span class="step"></span>
-          <span class="step"></span>
-          <!--<span class="step"></span>
-        </div>-->
-
         <!-- TODO: get feedback on how proposal is generated. One button with zip or keep two? -->
         <!-- Action Buttons -->
         <div class="d-flex gap-3 mt-4">
@@ -183,7 +38,6 @@ Section</button>
           <button type="button" id="generate-pdf" class="btn btn-success">Generate PDF</button>
           <button type="button" class="btn btn-primary" id="prevBtn" onclick="nextPrev(-1)">Previous</button>
           <button type="button" class="btn btn-primary" id="nextBtn" onclick="nextPrev(1)">Next</button>
-          <!--<button type="button" id="load-json" class="btn btn-warning">Load JSON</button>-->
         </div>
       </form>
     </div>
