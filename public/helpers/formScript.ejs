@@ -1,5 +1,14 @@
 <script>
   const form = document.getElementById("pdf-form");
+  let jsonGenerated = false;
+  let downloadTriggered = false;
+
+  const jsonBtn = document.getElementById("generate-json");
+  const pdfBtn = document.getElementById("generate-pdf");
+
+  if (pdfBtn) {
+    pdfBtn.disabled = true;
+  }
 
   // Function to remove the element
   function removeSection(element) {
@@ -27,13 +36,6 @@
   }
 
   function addEquipItem(button) {
-    //const container = button.previousElementSibling;
-    //const itemDiv = document.createElement('div');
-    //itemDiv.innerHTML = `
-    //    <label class="form-label">Item: <input type="text" name="equipItem" size="175" class="form-control" required /></label>
-    //    <button type="button" class="btn btn-danger btn-sm" onclick="this.parentNode.remove()">Remove Item</button>
-    //  `;
-    //container.appendChild(itemDiv);
     const equipSection = button.closest('.equip-room');
     if (!equipSection) {
       console.error('Equip room not found!');
@@ -80,19 +82,6 @@
       `;
     container.appendChild(itemDiv);
   }
-  ///** ==========================
-  // *  Dynamic Summary Section
-  // ========================== **/
-  //function addSummarySolution() {
-  //  const container = document.getElementById('summary-solutions');
-  //  const solutionDiv = document.createElement('div');
-  //  solutionDiv.className = 'nested-section';
-  //  solutionDiv.innerHTML = `
-  //      <label class="form-label">Solution: <input type="text" name="summarySolution" class="form-control" required /></label>
-  //      <button type="button" class="btn btn-danger btn-sm" onclick="this.parentNode.remove()">Remove Solution</button>
-  //    `;
-  //  container.appendChild(solutionDiv);
-  //}}
 
   /** ==========================
   * Add New Investment Section
@@ -140,35 +129,6 @@
         </div>
         `;
 
-    /*investDiv.addEventListener("dragstart", (e) => {
-        currentDragElement = investDiv;
-        investDiv.style.opacity = "0.5"; // Highlight dragging
-    });
-
-    investDiv.addEventListener("dragend", () => {
-        currentDragElement.style.opacity = "1"; // Remove highlight
-        currentDragElement = null;
-    });
-
-    investDiv.addEventListener("dragover", (e) => {
-        e.preventDefault(); // Allow dropping
-        const container = document.getElementById("investment-container");
-        const target = e.target.closest(".invest-section");
-
-        if (target && target !== currentDragElement) {
-            const targetRect = target.getBoundingClientRect();
-            const offset = e.clientY - targetRect.top;
-
-            if (offset > targetRect.height / 2) {
-                // Insert before the valid target
-                container.insertBefore(currentDragElement, target);
-            } else {
-                // If no target, move to the top of the container
-                container.insertBefore(currentDragElement, container.firstChild);
-            }
-        }
-    });*/
-
     container.appendChild(investDiv);
     initializeDragAndDrop();
     // Find all price inputs
@@ -206,6 +166,9 @@
   }
 
   document.addEventListener("DOMContentLoaded", () => {
+    const defaultCategory = "business";
+    document.getElementById("img-category").value = defaultCategory;
+    loadThumbnailsForCategory(defaultCategory);
     // Add default "Freight" section
     addInvestSection("Freight", ["SHIPPER PREPAYS FREIGHT – ADDS TO CUSTOMER INVOICE", "Due to volatility in freight charges, the shipping cost provided on this quote is an ESTIMATE only. Freight costs and the number of truckloads may change. The actual freight cost will be charged at the time of shipment OR on the final invoice."], ""); // Predefined items and empty price
     const textareas = document.querySelectorAll("textarea");
@@ -237,189 +200,90 @@
   });
 
   /** Generate JSON */
-  document.getElementById("generate-json").addEventListener("click", (e) => {
-    e.preventDefault();
-    const data = prepareFormData(form);
-    //const formData = new FormData(form);
+  if(jsonBtn) {
+    //document.getElementById("generate-json").addEventListener("click", (e) => {
+    jsonBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      const data = prepareFormData(form);
+      const jsonBlob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
 
-    // Filter out certain fields
-    /*const filteredData = Array.from(formData.entries()).filter(([key, value]) => {
-        // Exclude fields with specific names
-        return !['investSectionName', 'investItem', 'investPrice'].includes(key);
-    });*/
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(jsonBlob);
+      link.download = `${(data.title || "generated").replace(/[^a-zA-Z0-9-_]/g, "_").substring(0, 50)}.json`;
 
-    /*const data = Object.fromEntries(filteredData);
+      const handleBlur = () => {
+        downloadTriggered = true;
+      };
+      window.addEventListener("blur", handleBlur);
 
-    data.equip = {};
-    data.summary = { Objectives: formData.get('summaryObjective'), Solutions: [] };
-    data.invest = {};
+      link.click();
 
-    /** ==========================
-     * Process Equipment Section (Dynamic)
-     ========================== **
-    const equipSections = document.querySelectorAll('.equip-room');
-    equipSections.forEach((section) => {
-        const roomName = section.querySelector('[name="equipRoomName"]').value.trim();
-        if (roomName) {
-            const items = Array.from(
-                section.querySelectorAll('[name="equipItem"]')
-            )
-                .map((item) => item.value.trim())
-                .filter((item) => item);
-            if (items.length > 0) {
-                data.equip[roomName] = items;
-            }
+      setTimeout(() => {
+        window.removeEventListener("blur", handleBlur);
+
+        if(downloadTriggered) {
+          jsonGenerated = true;
+          if(pdfBtn) {
+            pdfBtn.disabled = false;
+          }
+        } else {
+          alert("Download was likely canceled or blocked. PDF generation remains disabled.");
         }
+
+        downloadTriggered = false;
+      }, 1000);
+      /*jsonGenerated = true;
+      if (pdfBtn) {
+        pdfBtn.disabled = false;
+      }*/
     });
-
-    /** ==========================
-     * Process Summary Section
-     ========================== **
-    document.querySelectorAll('[name="summarySolution"]').forEach((input) => {
-        const solution = input.value.trim();
-        if (solution) {
-            data.summary.Solutions.push(solution);
-        }
-    });
-
-    /** ==========================
-     * Process Investment Section (Dynamic)
-     ========================== **
-    const investSections = document.querySelectorAll('.invest-section');
-    investSections.forEach((section) => {
-        const sectionName = section.querySelector('[name="investSectionName"]').value.trim();
-        if (sectionName) {
-            const items = Array.from(
-                section.querySelectorAll('[name="investItem"]')
-            )
-                .map((item) => item.value.trim())
-                .filter((item) => item);
-
-            const priceInput = section.querySelector('[name="investPrice"]');
-            const price = priceInput && priceInput.value.trim() ? priceInput.value : null;
-
-            if (items.length > 0 || price) {
-                data.invest[sectionName] = {
-                    items: items,
-                    ...(price ? { price } : {}) // Add price only if it's non-empty
-                };
-            }
-        }
-    });*/
-
-    const jsonBlob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
-
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(jsonBlob);
-    link.download = `${(data.title || "generated").replace(/[^a-zA-Z0-9-_]/g, "_").substring(0, 50)}.json`;
-    link.click();
-  });
+  }
 
   /** ==========================
   * Form Submission
   ========================== **/
-  document.getElementById('generate-pdf').addEventListener("click", async (e) => {
-    e.preventDefault();
-    //const formData = new FormData(form);
-
-    // Filter out certain fields
-    /*const filteredData = Array.from(formData.entries()).filter(([key, value]) => {
-        // Exclude fields with specific names
-        return !['investSectionName', 'investItem', 'investPrice'].includes(key);
-    });*/
-
-    const data = prepareFormData(form);
-    /*const data = Object.fromEntries(filteredData);
-
-    data.equip = {};
-    data.summary = { Objectives: formData.get('summaryObjective'), Solutions: [] };
-    data.invest = {};
-
-    /** ==========================
-     * Process Equipment Section (Dynamic)
-     ========================== **
-    const equipSections = document.querySelectorAll('.equip-room');
-    equipSections.forEach((section) => {
-        const roomName = section.querySelector('[name="equipRoomName"]').value.trim();
-        if (roomName) {
-            const items = Array.from(
-                section.querySelectorAll('[name="equipItem"]')
-            )
-                .map((item) => item.value.trim())
-                .filter((item) => item);
-            if (items.length > 0) {
-                data.equip[roomName] = items;
-            }
-        }
-    });
-
-    /** ==========================
-     * Process Summary Section
-     ========================== **
-    document.querySelectorAll('[name="summarySolution"]').forEach((input) => {
-        const solution = input.value.trim();
-        if (solution) {
-            data.summary.Solutions.push(solution);
-        }
-    });
-
-    /** ==========================
-     * Process Investment Section (Dynamic)
-     ========================== **
-    const investSections = document.querySelectorAll('.invest-section');
-    investSections.forEach((section) => {
-        const sectionName = section.querySelector('[name="investSectionName"]').value.trim();
-        if (sectionName) {
-            const items = Array.from(
-                section.querySelectorAll('[name="investItem"]')
-            )
-                .map((item) => item.value.trim())
-                .filter((item) => item);
-
-            const priceInput = section.querySelector('[name="investPrice"]');
-            const price = priceInput && priceInput.value.trim() ? priceInput.value : null;
-
-            if (items.length > 0 || price) {
-                data.invest[sectionName] = {
-                    items: items,
-                    ...(price ? { price } : {}) // Add price only if it's non-empty
-                };
-            }
-        }
-    });*/
-
-    console.log('Final Data Before Sending:', JSON.stringify(data, null, 2));
-
-    try {
-      const response = await fetch('/generate-pdf', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(data)
-      });
-
-      if (response.ok) {
-        const blob = await response.blob();
-        const pdfUrl = URL.createObjectURL(blob);
-
-        const a = document.createElement('a');
-        a.href = pdfUrl;
-        //a.download = 'generated.pdf';
-        a.download = `${(data.title || "generated").replace(/[^a-zA-Z0-9-_]/g, "_").substring(0, 50)}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-
-        URL.revokeObjectURL(pdfUrl);
-        //alert('PDF generated successfully!');
-      } else {
-        console.error('PDF generation failed:', await response.text());
-        alert('Failed to generate PDF');
+  if(pdfBtn) {
+    //document.getElementById('generate-pdf').addEventListener("click", async (e) => {
+    pdfBtn.addEventListener("click", async (e) => {
+      if(!jsonGenerated) {
+        e.preventDefault();
+        alert("Please generate the JSON file before generating the PDF.");
       }
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      alert('An error occurred while generating the PDF.');
-    }
-  });
+      const data = prepareFormData(form);
+
+      console.log('Final Data Before Sending:', JSON.stringify(data, null, 2));
+
+      try {
+        const response = await fetch('/generate-pdf', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+          const blob = await response.blob();
+          const pdfUrl = URL.createObjectURL(blob);
+
+          const a = document.createElement('a');
+          a.href = pdfUrl;
+          //a.download = 'generated.pdf';
+          a.download = `${(data.title || "generated").replace(/[^a-zA-Z0-9-_]/g, "_").substring(0, 50)}.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+
+          URL.revokeObjectURL(pdfUrl);
+          //alert('PDF generated successfully!');
+        } else {
+          console.error('PDF generation failed:', await response.text());
+          alert('Failed to generate PDF');
+        }
+      } catch (error) {
+        console.error('Error submitting form:', error);
+        alert('An error occurred while generating the PDF.');
+      }
+    });
+  }
 
   document.getElementById("load-json").addEventListener("click", async () => {
     const fileInput = document.createElement("input");
@@ -447,7 +311,7 @@
   });
 
   // Populate form with data
-  function populateForm(data) {
+  async function populateForm(data) {
     const form = document.getElementById("pdf-form");
 
     // Populate basic fields
@@ -567,104 +431,6 @@
       }
     });
 
-    /** ✅ Handle Summary Sections **/
-    //const summarySections = document.querySelectorAll(".summary-section"); // Get all summary sections in form
-    //const summaryOrder = Object.keys(data.summary || {}); // Get order from JSON
-    //console.log(summaryOrder);
-
-    //summarySections.forEach((section) => {
-    //  console.log('Inside loop');
-    //  const titleField = section.querySelector("input.section-title"); // Title input
-    //  console.log(titleField);
-    //  const originalTitle = titleField.value.trim(); // Default title
-    //  let sectionName = summaryOrder.find(name => name.toLowerCase().includes(originalTitle.toLowerCase()));
-    //  consol.log(originalTitle);
-
-    //  if (sectionName) {
-    //    // ✅ Section exists in JSON → Enable & Populate
-    //    toggleSection(originalTitle, true);
-    //    titleField.value = sectionName; // Update title if changed
-
-    //    const summaryItemsContainer = section.querySelector(".summary-items");
-    //    summaryItemsContainer.innerHTML = ""; // Clear existing items
-
-    //    const content = data.summary[sectionName];
-    //    console.log(content);
-
-    //    if (Array.isArray(content)) {
-    //      // ✅ Multiple inputs (store as array)
-    //      content.forEach((item) => {
-    //        const fieldDiv = document.createElement("div");
-    //        fieldDiv.className = "input-group mb-3";
-    //        fieldDiv.innerHTML = `
-    //                    <input type="text" class="form-control summary-input" name="${sectionName}Text" value="${item}" required />
-    //                    <button class="btn btn-danger btn-sm" type="button" onclick="this.parentNode.remove()">
-    //                        <i class="bi bi-x-square-fill"></i>
-    //                    </button>
-    //                `;
-    //        summaryItemsContainer.appendChild(fieldDiv);
-    //      });
-    //    } else {
-    //      // ✅ Single textarea (store as string)
-    //      const fieldDiv = document.createElement("div");
-    //      fieldDiv.className = "input-group mb-3";
-    //      fieldDiv.innerHTML = `
-    //                <textarea class="form-control summary-textarea" name="${sectionName}Area" rows="3" required>${content}</textarea>
-    //            `;
-    //      summaryItemsContainer.appendChild(fieldDiv);
-
-    //      // Disable "Add Item" button when using a textarea
-    //      const addButton = section.querySelector(".add-item-btn");
-    //      if (addButton) addButton.disabled = true;
-    //    }
-    //  } else {
-    //    // ❌ Section NOT in JSON → Disable it
-    //    toggleSection(originalTitle, false);
-    //  }
-    //});
-    // ✅ Populate Summary Section
-    //if (data.summary) {
-    //  Object.entries(data.summary).forEach(([sectionName, content]) => {
-    //    const sectionContainer = document.querySelector(`[data-section="${sectionName}"]`);
-    //    if (!sectionContainer) {
-    //      console.warn(`⚠️ Section not found in DOM: ${sectionName}`);
-    //      return;
-    //    }
-
-    //    const summaryItemsContainer = sectionContainer.querySelector(".summary-items");
-    //    summaryItemsContainer.innerHTML = ""; // Clear existing items
-
-    //    if (Array.isArray(content)) {
-    //      // Multiple inputs -> Append as array
-    //      content.forEach((item) => {
-    //        const fieldDiv = document.createElement("div");
-    //        fieldDiv.className = "input-group mb-3";
-    //        fieldDiv.innerHTML = `
-    //                    <input type="text" class="form-control summary-input" name="${sectionName}Text" value="${item}" required />
-    //                    <button class="btn btn-danger btn-sm" type="button" onclick="this.parentNode.remove()">
-    //                        <i class="bi bi-x-square-fill"></i>
-    //                    </button>
-    //                `;
-    //        summaryItemsContainer.appendChild(fieldDiv);
-    //      });
-    //    } else {
-    //      // Single string (textarea) -> Show only one
-    //      const fieldDiv = document.createElement("div");
-    //      fieldDiv.className = "input-group mb-3";
-    //      fieldDiv.innerHTML = `
-    //                <textarea class="form-control summary-textarea" name="${sectionName}Area" rows="3" required>${content}</textarea>
-    //            `;
-    //      summaryItemsContainer.appendChild(fieldDiv);
-
-    //      // Disable "Add Item" button since only one textarea should be allowed
-    //      const addButton = sectionContainer.querySelector(".add-item-btn");
-    //      if (addButton) {
-    //        addButton.disabled = true;
-    //      }
-    //    }
-    //  });
-    //}
-
     // Handle investment sections (dynamically create missing sections and items)
     if (data.invest) {
       const investContainer = document.getElementById("investment-container");
@@ -675,9 +441,23 @@
     }
 
     // Handle the dropdown explicitly
-    const selectDropdown = document.querySelector('[name="imgpath"]');
-    if (selectDropdown) {
+    const category = form.querySelector('[name="img-category"]').value;
+    console.log("Category: ", category);
+    /*if (selectDropdown) {
       selectDropdown.value = data.imgpath || ""; // Set to saved value or default if not present
+    }*/
+    if (category) { await loadThumbnailsForCategory(category);
+
+      // Highlight the selected thumbnail based on saved imgpath
+      if (data.imgpath) {
+        const container = document.getElementById("thumbnail-container");
+        const selectedImg = Array.from(container.querySelectorAll("img"))
+        .find(img => img.alt === data.imgpath);
+
+        if (selectedImg) {
+          selectedImg.classList.add("selected");
+        }
+      }
     }
   }
 
@@ -773,34 +553,8 @@
       }
     });
 
-    // Process Summary Section
-    //document.querySelectorAll('[name="summarySolution"]').forEach((input) => {
-    //  const solution = input.value.trim();
-    //  if (solution) {
-    //    data.summary.Solutions.push(solution);
-    //  }
-    //});
-
     //// Select all dynamically added summary sections
     const summarySections = document.querySelectorAll(".sum-section");
-
-    //summarySections.forEach((section) => {
-    //  const summaryName = section.querySelector('input.section-title')?.value.trim(); // ✅ Get section name
-    //  if (!summaryName) return; // Skip if empty
-
-    //  const items = Array.from(section.querySelectorAll(".summary-input, .summary-textarea"))
-    //    .map((item) => item.value.trim())
-    //    .filter((item) => item.length > 0); // ✅ Collect all non-empty summary items
-
-    //  console.log(`🔹 Summary Name: ${summaryName}, Items:`, items); // Debugging
-
-    //  if (!data.summary) data.summary = {}; // ✅ Ensure summary object exists
-
-    //  if (items.length > 0) {
-    //    // ✅ If multiple items exist, store as array
-    //    data.summary[summaryName] = items.length === 1 ? items[0] : items;
-    //  }
-    //});
 
     summarySections.forEach((section) => {
       const summaryName = section.querySelector("input.section-title")?.value.trim(); // ✅ Get section name
@@ -851,6 +605,7 @@
 
     return data;
   }
+
   document.addEventListener("click", (event) => {
     if (event.target.classList.contains("contracts")) {
       const allContracts = document.querySelectorAll(".contracts");
@@ -864,27 +619,6 @@
 
   var currentTab = 0; // Current tab is set to be the first tab (0)
   showTab(currentTab); // Display the current tab
-
-  //function showTab(n) {
-  //  // This function will display the specified tab of the form ...
-  //  var x = document.getElementsByClassName("tab");
-  //  x[n].style.display = "block";
-  //  // ... and fix the Previous/Next buttons:
-  //  if (n == 0) {
-  //    document.getElementById("prevBtn").style.display = "none";
-  //  } else {
-  //    document.getElementById("prevBtn").style.display = "inline";
-  //  }
-  //  if (n == (x.length - 1)) {
-  //    document.getElementById("nextBtn").style.display = "none";
-  //  } else {
-  //    x[n].style.display = "block";
-  //    document.getElementById("nextBtn").style.display = "inline";
-  //    document.getElementById("nextBtn").innerHTML = "Next";
-  //  }
-  //  // ... and run a function that displays the correct step indicator:
-  //  //fixStepIndicator(n)
-  //}
 
   function showTab(n) {
     var tabs = document.getElementsByClassName("tab");
@@ -923,127 +657,6 @@
     // Show the updated tab
     showTab(currentTab);
   }
-
-  //function nextPrev(n) {
-  //  // This function will figure out which tab to display
-  //  var x = document.getElementsByClassName("tab");
-  //  // Exit the function if any field in the current tab is invalid:
-  //  if (n == 1 && !validateForm()) return false;
-  //  // Hide the current tab:
-  //  x[currentTab].style.display = "none";
-  //  // Increase or decrease the current tab by 1:
-  //  currentTab += n;
-  //  // if you have reached the end of the form... :
-  //  //if (currentTab >= x.length) {
-  //  //  //...the form gets submitted:
-  //  //  document.getElementById("regForm").submit();
-  //  //  return false;
-  //  //}
-  //  // Otherwise, display the correct tab:
-  //  if (currentTab < 0) {currentTab = 0;}
-  //  if (currentTab <= x.length) {currentTab = x.length - 1;}
-  //  showTab(currentTab);
-  //}
-
-  //function validateForm() {
-  //  var tabs = document.getElementsByClassName("tab");
-  //  var inputs = tabs[currentTab].querySelectorAll("input, textarea");
-  //  var valid = true;
-  //  console.log('Current Summary Inputs: ' + inputs);
-
-  //  inputs.forEach((input) => {
-  //    if (input.value.trim() === "") {
-  //      input.classList.add("invalid"); // Add invalid styling
-  //      valid = false;
-  //    } else {
-  //      input.classList.remove("invalid"); // Remove invalid styling if corrected
-  //    }
-  //  });
-
-  //  return valid;
-  //}
-
-  //function validateForm() {
-  //  // This function deals with validation of the form fields
-  //  var x, y, i, valid = true;
-  //  x = document.getElementsByClassName("tab");
-  //  y = x[currentTab].getElementsByTagName("input");
-  //  // A loop that checks every input field in the current tab:
-  //  for (i = 0; i < y.length; i++) {
-  //    // If a field is empty...
-  //    if (y[i].value == "") {
-  //      // add an "invalid" class to the field:
-  //      y[i].className += " invalid";
-  //      // and set the current valid status to false:
-  //      valid = false;
-  //    }
-  //  }
-  //  // If the valid status is true, mark the step as finished and valid:
-  //  //if (valid) {
-  //  //  document.getElementsByClassName("step")[currentTab].className += " finish";
-  //  //}
-  //  //return valid; // return the valid status
-  //}
-
-  //function fixStepIndicator(n) {
-  //  // This function removes the "active" class of all steps...
-  //  var i, x = document.getElementsByClassName("step");
-  //  for (i = 0; i < x.length; i++) {
-  //    x[i].className = x[i].className.replace(" active", "");
-  //  }
-  //  //... and adds the "active" class to the current step:
-  //  x[n].className += " active";
-  //}
-
-  // Function that will show all summary fields if the summary checkbox is included in the page selection
-  //function toggleSummaryFields() {
-  //  var summary = document.getElementById('sumpg');
-  //  var divId = document.getElementById('step3');
-  //  var tmp = '';
-
-  //  if (summary.checked && document.getElementById('summary').id === 'summary') {
-  //    tmp = divId.id;
-  //    divId.id = 'step4';
-  //    document.getElementById('summary').id = tmp;
-  //  } else if (summary.checked && divId.id === 'step3') {
-  //    divId.style.display = 'block';
-  //  } else {
-  //    divId.id = 'summary';
-  //    document.getElementById('step4').id = 'step3';
-  //  }
-  //}
-
-  //function validateForm() {
-  //  var tabs = document.getElementsByClassName("tab");
-  //  var currentSection = tabs[currentTab]; // Get current section
-  //  var inputs = currentSection.querySelectorAll("input:not([disabled]), textarea:not([disabled])");
-  //  var valid = true;
-
-  //  console.log('Validating Inputs:', inputs.length);
-
-  //  // Convert NodeList to an Array (for compatibility)
-  //  Array.from(inputs).forEach((input) => {
-  //    if (input.value.trim() === "") {
-  //      input.classList.add("invalid"); // Add invalid styling
-  //      valid = false;
-  //    } else {
-  //      input.classList.remove("invalid"); // Remove invalid styling if corrected
-  //    }
-  //  });
-
-  //  // 🎯 Ensure that **disabled titles** in summary sections are validated
-  //  var disabledTitles = currentSection.querySelectorAll("input[disabled]");
-  //  Array.from(disabledTitles).forEach((title) => {
-  //    if (title.value.trim() === "") {
-  //      title.classList.add("invalid"); // Mark as invalid
-  //      valid = false;
-  //    } else {
-  //      title.classList.remove("invalid"); // Remove invalid styling
-  //    }
-  //  });
-
-  //  return valid;
-  //}
 
   function validateForm() {
     var tabs = document.getElementsByClassName("tab");
@@ -1225,18 +838,6 @@
     // Store enabled state for JSON processing
     sectionContainer.dataset.enabled = isEnabled;
   }
-  ///** Function to dynamically disable the "Enable" option */
-  //function disableEnableOption(section, isEnabled) {
-  //  const dropdownItems = document.querySelectorAll(`#${section}SectionTitle .dropdown-menu .dropdown-item`);
-
-  //  dropdownItems.forEach(item => {
-  //    if (item.textContent.includes("Enable")) {
-  //      item.classList.toggle("disabled", isEnabled);
-  //    } else if (item.textContent.includes("Disable")) {
-  //      item.classList.toggle("disabled", !isEnabled);
-  //    }
-  //  });
-  //}
 
   document.getElementById("summaryBool").addEventListener("change", function () {
     const sumSection = document.getElementById("summary-section");
@@ -1253,5 +854,40 @@
     const fields = equipSection.querySelectorAll("input, textarea, button");
     fields.forEach(field => {field.disabled = !isEnabled;});
   });
+ 
+  document.getElementById('img-category').addEventListener('change', async (event) => {
+    const category = event.target.value;
+    try {
+      await loadThumbnailsForCategory(category);
+    } catch (err) {
+      console.error("function failed: ", err);
+    }
+  });
 
+  async function loadThumbnailsForCategory(category) {
+    const container = document.getElementById('thumbnail-container');
+    container.innerHTML = ''; // clear previous
+
+    try {
+      const res = await fetch(`/api/images?category=${category}`);
+      const images = await res.json();
+
+      images.forEach(({ thumb, full }) => {
+        const img = document.createElement('img');
+        img.src = thumb;
+        img.alt = full;
+        img.className = 'thumbnail';
+        img.style.cursor = 'pointer';
+        img.addEventListener('click', () => {
+          document.getElementById('imgpath').value = full;
+          container.querySelectorAll('img').forEach(i => i.classList.remove('selected'));
+          img.classList.add('selected');
+        });
+
+        container.appendChild(img);
+      }); 
+    } catch (err) {
+      console.error("Error loading thumbnails:", err);
+    }
+  }
 </script>
