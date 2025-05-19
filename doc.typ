@@ -4,6 +4,7 @@
 #setup(
   title: $title$,
   author: $author$,
+  proposal: $proposal$,
   customer: $customer$,
   address: $address$,
   city: $city$,

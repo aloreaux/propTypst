@@ -28,7 +28,7 @@ Thank you very much for this opportunity and your business!
   align: (left, left),
   stroke: none,
   [Date:],[#_today],
-  [Proposal:],[DONN-1234],
+  [Proposal:],[#context{proposal-state.get()}],
   linebreak(),linebreak(),
   [Presented By:],[#context{author-state.get()}],
   [Office:],[800-222-6311 ext. #context{ext-state.get()}],

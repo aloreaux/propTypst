@@ -1,47 +1,38 @@
 <h2 class="mb-4">Basic Information</h2>
-<div class="col-md-6">
-  <label for="title" class="form-label">Title</label>
-  <input type="text" id="title" name="title" class="form-control" placeholder="Enter title" required />
-</div>
-<div class="col-md-6">
-  <label for="author" class="form-label">Author</label>
-  <input type="text" id="author" name="author" class="form-control" placeholder="Enter author" required />
-</div>
-<div class="col-md-6">
-  <label for="customer" class="form-label">Customer Name</label>
-  <input type="text" id="customer" name="customer" class="form-control" placeholder="Enter customer name" required />
-</div>
-<div class="col-md-6">
-  <label for="address" class="form-label">Address</label>
-  <input type="text" id="address" name="address" class="form-control" placeholder="Enter address" required />
-</div>
-<div class="col-md-4">
-  <label for="city" class="form-label">City</label>
-  <input type="text" id="city" name="city" class="form-control" placeholder="Enter city" required />
-</div>
-<div class="col-md-4">
-  <label for="state" class="form-label">State</label>
-  <input type="text" id="state" name="state" class="form-control" placeholder="Enter state" required />
-</div>
-<div class="col-md-4">
-  <label for="zip" class="form-label">Zip</label>
-  <input type="text" id="zip" name="zip" class="form-control" placeholder="Enter zip" required />
-</div>
-<div class="col-md-4">
-  <label for="extension" class="form-label">Extension</label>
-  <input type="text" id="extension" name="extension" class="form-control" placeholder="Enter extension" required />
-</div>
-<div class="col-md-4">
-  <label for="cell" class="form-label">Cell</label>
-  <input type="text" id="cell" name="cell" class="form-control" placeholder="Enter cell #" required />
-</div>
-<div id="service-section">
-  <div class="col-md-4">
-    <label for="quantity" class="form-label">Carriage Quantity</label>
-    <input type="text" id="quantity" name="quantity" class="form-control" placeholder="# of carriages" required />
+<div class="row g-3">
+  <div class="col-md-6 pe-5 border-end">
+    <label for="title" class="form-label">Project Title</label>
+    <input type="text" id="title" name="title" class="form-control" placeholder="Enter Project Title" required />
+    <label for="customer" class="form-label">Customer Name</label>
+    <input type="text" id="customer" name="customer" class="form-control" placeholder="Enter Customer Name" required />
+    <label for="address" class="form-label">Customer Address</label>
+    <input type="text" id="address" name="address" class="form-control" placeholder="Enter address" required />
+    <label for="city" class="form-label">City</label>
+    <!--<input type="text" id="city" name="city" class="form-control" placeholder="Enter city" required />-->
+    <%- include('cities.ejs'); %>
+      <div class="row">
+        <div class="col-md-6">
+          <!--<label for="state" class="form-label">State</label>
+        <input type="text" id="state" name="state" class="form-control" placeholder="Enter state" required />-->
+          <%- include('states.ejs'); %>
+        </div>
+        <div class="col-md-6">
+          <%- include('zip.ejs'); %>
+        </div>
+      </div>
   </div>
-  <div class="col-md-6">
-    <label for="carriage" class="form-label">Service Cost</label>
-    <input type="text" id="carriage" name="carriage" class="form-control" placeholder="Cost per carriage" required />
+  <div class="col-md-6 px-5">
+    <label for="author" class="form-label">Salesperson</label>
+    <input type="text" id="author" name="author" class="form-control" placeholder="Enter Salesperson" required />
+    <label for="cell" class="form-label">Cell</label>
+    <input type="text" id="cell" name="cell" class="form-control" placeholder="Enter cell #" required />
+    <label for="extension" class="form-label">Extension</label>
+    <input type="text" id="extension" name="extension" class="form-control" placeholder="Enter extension" required />
+    <div id="service-section">
+      <label for="quantity" class="form-label">Carriage Quantity</label>
+      <input type="text" id="quantity" name="quantity" class="form-control" placeholder="# of carriages" required />
+      <label for="carriage" class="form-label">Service Cost</label>
+      <input type="text" id="carriage" name="carriage" class="form-control" placeholder="Cost per carriage" required />
+    </div>
   </div>
 </div>

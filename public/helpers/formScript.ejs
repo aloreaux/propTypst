@@ -6,6 +6,31 @@
   const jsonBtn = document.getElementById("generate-json");
   const pdfBtn = document.getElementById("generate-pdf");
 
+  const investmentContainer = document.getElementById("investment-container");
+
+  const observer = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
+        mutation.addedNodes.forEach((node) => {
+          if (
+            node.nodeType === Node.ELEMENT_NODE &&
+            node.matches("input[name='investPrice']")
+          ) {
+            addCommas(node);
+          } else if (
+            node.nodeType === Node.ELEMENT_NODE &&
+            node.querySelectorAll
+          ) {
+            // Check inside added subtree for matching inputs
+            node
+              .querySelectorAll("input[name='investPrice']")
+              .forEach((input) => addCommas(input));
+          }
+        });
+      }
+    }
+  });
+
   if (pdfBtn) {
     pdfBtn.disabled = true;
   }
@@ -165,42 +190,8 @@
     investItemsContainer.appendChild(itemDiv);
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
-    const defaultCategory = "business";
-    document.getElementById("img-category").value = defaultCategory;
-    loadThumbnailsForCategory(defaultCategory);
-    // Add default "Freight" section
-    addInvestSection("Freight", ["SHIPPER PREPAYS FREIGHT – ADDS TO CUSTOMER INVOICE", "Due to volatility in freight charges, the shipping cost provided on this quote is an ESTIMATE only. Freight costs and the number of truckloads may change. The actual freight cost will be charged at the time of shipment OR on the final invoice."], ""); // Predefined items and empty price
-    const textareas = document.querySelectorAll("textarea");
-
-    const resizeTextarea = (textarea) => {
-      // Reset height to auto to recalculate
-      textarea.style.height = "auto";
-
-      // Set height to scrollHeight
-      textarea.style.height = `${textarea.scrollHeight}px`;
-    };
-
-    textareas.forEach((textarea) => {
-      // Attach input event to dynamically resize on text changes
-      textarea.addEventListener("input", () => resizeTextarea(textarea));
-
-      // Resize on page load to fit pre-filled content
-      resizeTextarea(textarea);
-    });
-
-    showTab(currentTab); // Ensure first tab is visible
-
-    // Reinitialize comma formatting for dynamically added price inputs
-    document.getElementById("investment-container").addEventListener("DOMNodeInserted", (e) => {
-      if (e.target.tagName === "INPUT" && e.target.name === "investPrice") {
-        numberWithCommas(e.target);
-      }
-    });
-  });
-
   /** Generate JSON */
-  if(jsonBtn) {
+  if (jsonBtn) {
     //document.getElementById("generate-json").addEventListener("click", (e) => {
     jsonBtn.addEventListener("click", (e) => {
       e.preventDefault();
@@ -211,27 +202,6 @@
       link.href = URL.createObjectURL(jsonBlob);
       link.download = `${(data.title || "generated").replace(/[^a-zA-Z0-9-_]/g, "_").substring(0, 50)}.json`;
 
-      /*const handleBlur = () => {
-        downloadTriggered = true;
-      };
-      window.addEventListener("blur", handleBlur);
-
-      link.click();
-
-      setTimeout(() => {
-        window.removeEventListener("blur", handleBlur);
-
-        if(downloadTriggered) {
-          jsonGenerated = true;
-          if(pdfBtn) {
-            pdfBtn.disabled = false;
-          }
-        } else {
-          alert("Download was likely canceled or blocked. PDF generation remains disabled.");
-        }
-
-        downloadTriggered = false;
-      }, 1000);*/
       jsonGenerated = true;
       pdfBtn?.removeAttribute("disabled");
       link.click();
@@ -241,10 +211,10 @@
   /** ==========================
   * Form Submission
   ========================== **/
-  if(pdfBtn) {
+  if (pdfBtn) {
     //document.getElementById('generate-pdf').addEventListener("click", async (e) => {
     pdfBtn.addEventListener("click", async (e) => {
-      if(!jsonGenerated) {
+      if (!jsonGenerated) {
         e.preventDefault();
         alert("Please generate the JSON file before generating the PDF.");
       }
@@ -324,6 +294,20 @@
         }
       }
     });
+
+    const state = form.querySelector('[name="state"]')?.value;
+    const city = form.querySelector('[name="city"]')?.value;
+    const zipField = form.querySelector('[name="zip"]');
+
+    if (state && city && zipField) {
+      updateZipFromCity(state, city, zipField);
+
+      if (data.zip) {
+        const zipToSelect = String(data.zip).padStart(5, "0");
+        const match = Array.from(zipField.options).find(opt => opt.value === zipToSelect);
+        if (match) match.selected = true;
+      }
+    }
 
     // Handle equipment (dynamically create missing rooms and items)
     if (data.equip && Object.keys(data.equip).length > 0) {
@@ -445,13 +429,14 @@
     /*if (selectDropdown) {
       selectDropdown.value = data.imgpath || ""; // Set to saved value or default if not present
     }*/
-    if (category) { await loadThumbnailsForCategory(category);
+    if (category) {
+      await loadThumbnailsForCategory(category);
 
       // Highlight the selected thumbnail based on saved imgpath
       if (data.imgpath) {
         const container = document.getElementById("thumbnail-container");
         const selectedImg = Array.from(container.querySelectorAll("img"))
-        .find(img => img.alt === data.imgpath);
+          .find(img => img.alt === data.imgpath);
 
         if (selectedImg) {
           selectedImg.classList.add("selected");
@@ -861,7 +846,7 @@
     const fields = serviceSection.querySelectorAll("input, textarea, button");
     fields.forEach(field => {field.disabled = !isEnabled;});
   });
- 
+
   document.getElementById('img-category').addEventListener('change', async (event) => {
     const category = event.target.value;
     try {
@@ -879,7 +864,7 @@
       const res = await fetch(`/api/images?category=${category}`);
       const images = await res.json();
 
-      images.forEach(({ thumb, full }) => {
+      images.forEach(({thumb, full}) => {
         const img = document.createElement('img');
         img.src = thumb;
         img.alt = full;
@@ -892,9 +877,140 @@
         });
 
         container.appendChild(img);
-      }); 
+      });
     } catch (err) {
       console.error("Error loading thumbnails:", err);
     }
   }
+
+  async function initStateCityZipForm() {
+    const stateSelect = document.getElementById("state");
+    const citySelect = document.getElementById("city");
+    const zipSelect = document.getElementById("zip");
+
+    try {
+      stateCityZipData = await loadStateCityZipData('/assets/states.min.json');
+
+      populateStateOptions(stateSelect, Object.keys(stateCityZipData));
+      stateSelect.value = "MA";
+      populateCitiesAndZip("MA", citySelect, zipSelect);
+
+      // Events
+      stateSelect.addEventListener("change", () => {
+        populateCitiesAndZip(stateSelect.value, citySelect, zipSelect);
+      });
+
+      citySelect.addEventListener("change", () => {
+        updateZipFromCity(stateSelect.value, citySelect.value, zipSelect);
+      });
+
+    } catch (err) {
+      console.error("Failed to initialize form:", err);
+    }
+  }
+
+  // Loads the JSON data
+  async function loadStateCityZipData(path) {
+    const response = await fetch(path);
+    if (!response.ok) throw new Error("Failed to load state/city data");
+    return response.json();
+  }
+
+  // Populates state dropdown
+  function populateStateOptions(select, states) {
+    states.forEach(state => {
+      const option = document.createElement("option");
+      option.value = state;
+      option.textContent = state;
+      select.appendChild(option);
+    });
+  }
+
+  // Populates city dropdown and sets ZIP
+  function populateCitiesAndZip(state, citySelect, zipSelect) {
+    const cities = Object.keys(stateCityZipData[state]?.cities || {});
+    citySelect.innerHTML = "";
+
+    if (cities.length === 0) {
+      citySelect.disabled = true;
+      zipSelect.value = "";
+      return;
+    }
+
+    cities.forEach(city => {
+      const option = document.createElement("option");
+      option.value = city;
+      option.textContent = city;
+      citySelect.appendChild(option);
+    });
+
+    citySelect.disabled = false;
+    citySelect.selectedIndex = 0;
+    updateZipFromCity(state, citySelect.value, zipSelect);
+  }
+
+  // Updates ZIP based on selected city
+  function updateZipFromCity(state, city, zipSelect) {
+    //const zipList = stateCityZipData[state]?.cities[city] || [];
+    //zipInput.value = zipList.length > 0 ? String(zipList[0]).padStart(5, "0") : "";
+    const zipList = stateCityZipData[state]?.cities[city] || [];
+    zipSelect.innerHTML = "";
+
+    if (zipList.length === 0) {
+      zipSelect.disabled = true;
+      return;
+    }
+
+    zipList.forEach(zip => {
+      const option = document.createElement("option");
+      const paddedZip = String(zip).padStart(5, "0");
+      option.value = paddedZip;
+      option.textContent = paddedZip;
+      zipSelect.appendChild(option);
+    });
+
+    zipSelect.disabled = false;
+    zipSelect.selectedIndex = 0;
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const defaultCategory = "business";
+
+    document.getElementById("img-category").value = defaultCategory;
+    loadThumbnailsForCategory(defaultCategory);
+    // Add default "Freight" section
+    addInvestSection("Freight", ["SHIPPER PREPAYS FREIGHT – ADDS TO CUSTOMER INVOICE", "Due to volatility in freight charges, the shipping cost provided on this quote is an ESTIMATE only. Freight costs and the number of truckloads may change. The actual freight cost will be charged at the time of shipment OR on the final invoice."], ""); // Predefined items and empty price
+    const textareas = document.querySelectorAll("textarea");
+
+    const resizeTextarea = (textarea) => {
+      // Reset height to auto to recalculate
+      textarea.style.height = "auto";
+
+      // Set height to scrollHeight
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    };
+
+    textareas.forEach((textarea) => {
+      // Attach input event to dynamically resize on text changes
+      textarea.addEventListener("input", () => resizeTextarea(textarea));
+
+      // Resize on page load to fit pre-filled content
+      resizeTextarea(textarea);
+    });
+
+    showTab(currentTab); // Ensure first tab is visible
+    initStateCityZipForm();
+
+    // Reinitialize comma formatting for dynamically added price inputs
+    //document.getElementById("investment-container").addEventListener("DOMNodeInserted", (e) => {
+    //  if (e.target.tagName === "INPUT" && e.target.name === "investPrice") {
+    //    numberWithCommas(e.target);
+    //  }
+    //});
+
+    observer.observe(investmentContainer, {
+      childList: true,
+      subtree: true, // capture inputs added deeper in the tree
+    });
+  });
 </script>

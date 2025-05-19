@@ -21,6 +21,7 @@ app.use(bodyParser.json());
 
 const IMAGE_DIR = path.join(__dirname, 'templates/assets');
 const THUMB_DIR = path.join(__dirname, 'public/assets/thumbnails');
+const counterFilePath = path.join(__dirname, 'data', 'proposal_counter.txt');
 
 const docDefaults = {
   corporate: true,
@@ -51,6 +52,7 @@ app.post("/generate-pdf", async (req, res) => {
   const outputPdfPath = getSessionFilePath(sessionId, "output", "pdf");
   const docForm = { ...docDefaults, ...req.body };
   const appRoot = process.cwd();
+  const proposalId = await getNextProposalCounter();
 
   // Boolean conversion
   docForm.quoteBool = !!docForm.quoteBool;
@@ -71,6 +73,7 @@ app.post("/generate-pdf", async (req, res) => {
   // Handle image paths
   docForm.cornerimg = `assets/${category}/${category}.svg`;
   docForm.imgcategory = category;
+  docForm.proposal = proposalId;
 
   // Handle dynamic sections
   if (req.body.equip && Object.keys(req.body.equip).length > 0) {
@@ -139,9 +142,9 @@ app.post("/generate-pdf", async (req, res) => {
       });
     });
 
-    const sanitizedTitle = (docForm.title || "generated")
+    const sanitizedTitle = `${proposalId} - ${(docForm.title || "generated")
     .replace(/[^a-zA-Z0-9-_]/g, "_") // Replace unsafe characters with underscores
-    .substring(0, 50); // Limit length to 50 characters
+    .substring(0, 50)}`; // Limit length to 50 characters
     const filename = `${sanitizedTitle}.pdf`;
 
     // Send the PDF as a response
@@ -257,6 +260,19 @@ function convertJsonToTypstDict(jsonObject) {
     }
   }
   return typstDict.slice(0, -2) + ")";
+}
+
+async function getNextProposalCounter() {
+  try {
+    const current = await fsp.readFile(counterFilePath, 'utf8');
+    const next = parseInt(current, 10) + 1;
+    const formatted = `DONN-${String(next).padStart(6, '0')}`;
+    await fsp.writeFile(counterFilePath, next.toString());
+    return formatted;
+  } catch (err) {
+    console.error("Failed to read or update proposal counter:", err);
+    return "DONN-XXXXXX";
+  }
 }
 
 // Serve static files if needed (e.g., for testing thumbnails)

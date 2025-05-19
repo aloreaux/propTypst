@@ -11,6 +11,7 @@
 
 #let title-state = state("title", "")
 #let author-state = state("author","")
+#let proposal-state = state("proposal", "")
 #let customer-state = state("customer", "")
 #let equip-state = state("equip", "")
 #let address-state = state("address", "")
@@ -35,6 +36,7 @@
 #let setup(
     title: none,
     author: none,
+    proposal: none,
     customer: none,
     address: none,
     state: none,
@@ -46,6 +48,7 @@
 ) = {
     title-state.update(title)
     author-state.update(author)
+    proposal-state.update(proposal)
     customer-state.update(customer)
     address-state.update(address)
     state-state.update(state)
