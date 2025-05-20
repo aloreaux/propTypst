@@ -5,6 +5,7 @@
 
   const jsonBtn = document.getElementById("generate-json");
   const pdfBtn = document.getElementById("generate-pdf");
+  let cacheProposalId = null;
 
   const investmentContainer = document.getElementById("investment-container");
 
@@ -33,6 +34,14 @@
 
   if (pdfBtn) {
     pdfBtn.disabled = true;
+  }
+
+  async function getOrCreateProposalId() {
+    if (cacheProposalId) {return cacheProposalId;}
+    const res = await fetch('/next-proposal-id');
+    const data = await res.json();
+    cacheProposalId = data.proposalId;
+    return cacheProposalId;
   }
 
   // Function to remove the element
@@ -193,18 +202,41 @@
   /** Generate JSON */
   if (jsonBtn) {
     //document.getElementById("generate-json").addEventListener("click", (e) => {
-    jsonBtn.addEventListener("click", (e) => {
+    jsonBtn.addEventListener("click", async (e) => {
       e.preventDefault();
-      const data = prepareFormData(form);
-      const jsonBlob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
+      const data = await prepareFormData(form);
 
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(jsonBlob);
-      link.download = `${(data.title || "generated").replace(/[^a-zA-Z0-9-_]/g, "_").substring(0, 50)}.json`;
+      try {
+        const response = await fetch('/generate-json', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(data)
+        });
 
-      jsonGenerated = true;
-      pdfBtn?.removeAttribute("disabled");
-      link.click();
+        if (response.ok) {
+          console.log("Value of data:", data)
+          //const jsonBlob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
+          const blob = await response.blob();
+          const jsonUrl = URL.createObjectURL(blob);
+
+          const a = document.createElement("a");
+          a.href = jsonUrl;
+          a.download = `${data.proposal}_${(data.title || "generated").replace(/[^a-zA-Z0-9-_]/g, "_").substring(0, 50)}.json`;
+          console.log("Value of a.download:", a.download);
+          document.body.appendChild(a);
+          jsonGenerated = true;
+          pdfBtn?.removeAttribute("disabled");
+          a.click();
+          document.body.removeChild(a);
+
+          URL.revokeObjectURL(jsonUrl);
+        } else {
+          alert("Failed to generate JSON");
+        }
+      } catch (err) {
+        console.error("Error generating JSON:", err);
+        alert("An error occurred while generating the JSON file.");
+      }
     });
   }
 
@@ -218,7 +250,7 @@
         e.preventDefault();
         alert("Please generate the JSON file before generating the PDF.");
       }
-      const data = prepareFormData(form);
+      const data = await prepareFormData(form);
 
       console.log('Final Data Before Sending:', JSON.stringify(data, null, 2));
 
@@ -236,7 +268,8 @@
           const a = document.createElement('a');
           a.href = pdfUrl;
           //a.download = 'generated.pdf';
-          a.download = `${(data.title || "generated").replace(/[^a-zA-Z0-9-_]/g, "_").substring(0, 50)}.pdf`;
+          //a.download = `${data.proposal}_${(data.title || "generated").replace(/[^a-zA-Z0-9-_]/g, "_").substring(0, 50)}.pdf`;
+          a.download = `${data.proposal}_${(data.title || "generated").replace(/[^a-zA-Z0-9-_]/g, "_").substring(0, 50)}.pdf`;
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
@@ -425,10 +458,6 @@
 
     // Handle the dropdown explicitly
     const category = form.querySelector('[name="img-category"]').value;
-    console.log("Category: ", category);
-    /*if (selectDropdown) {
-      selectDropdown.value = data.imgpath || ""; // Set to saved value or default if not present
-    }*/
     if (category) {
       await loadThumbnailsForCategory(category);
 
@@ -501,8 +530,10 @@
   /** ==========================
    * Utility Function: Prepare Form Data
    ========================== **/
-  function prepareFormData(form) {
+  async function prepareFormData(form) {
     const formData = new FormData(form);
+    const proposalId = await getOrCreateProposalId();
+    console.log("Proposal ID from prepareFormData:", proposalId);
     // Filter out certain fields
     const filteredData = Array.from(formData.entries()).filter(([key, value]) => {
       // Exclude fields with specific names
@@ -516,6 +547,9 @@
       const rawValue = removeCommas(field.value);
       data[field.name] = rawValue; // Update data for submission
     });
+
+    data.proposal = proposalId;
+    console.log("data.proposal:", data.proposal);
 
     // Include dynamic sections (Equipment, Summary, Investment)
     data.equip = {};
