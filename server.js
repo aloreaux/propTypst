@@ -9,9 +9,6 @@ const sharp = require("sharp");
 
 const app = express();
 
-//const fsext = require('fs-extra');
-//fsext.copySync('templates/assets', 'public/assets', { overwrite: true });
-
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "public/views"));
 
@@ -33,14 +30,9 @@ const docDefaults = {
 
 // Helper to generate session-specific file paths
 function getSessionFilePath(sessionId, name, extension) {
-  //return path.join(os.tmpdir(), `${sessionId}${name}.${extension}`);
   const tmpDir = path.resolve(__dirname, "tmp");
   return path.join(tmpDir, `${sessionId}${name}.${extension}`);
 }
-
-/*app.get("/", (req, res) => {
-  res.render("index");
-});*/
 
 app.get("/", (req, res) => {
   res.render("form");
@@ -52,7 +44,6 @@ app.post("/generate-pdf", async (req, res) => {
   const outputPdfPath = getSessionFilePath(sessionId, "output", "pdf");
   const docForm = { ...docDefaults, ...req.body };
   const appRoot = process.cwd();
-  const proposalId = await getNextProposalCounter();
 
   // Boolean conversion
   docForm.quoteBool = !!docForm.quoteBool;
@@ -73,7 +64,6 @@ app.post("/generate-pdf", async (req, res) => {
   // Handle image paths
   docForm.cornerimg = `assets/${category}/${category}.svg`;
   docForm.imgcategory = category;
-  docForm.proposal = proposalId;
 
   // Handle dynamic sections
   if (req.body.equip && Object.keys(req.body.equip).length > 0) {
@@ -98,6 +88,8 @@ app.post("/generate-pdf", async (req, res) => {
   if (docForm.imgpath.startsWith('templates/')) {
     docForm.imgpath = docForm.imgpath.replace(/^templates\//, '');
   }
+
+  docForm.proposal = req.body.proposal;
 
   console.log("Processed Data:", JSON.stringify(docForm, null, 2));
 
@@ -142,18 +134,18 @@ app.post("/generate-pdf", async (req, res) => {
       });
     });
 
-    const sanitizedTitle = `${proposalId} - ${(docForm.title || "generated")
+    const sanitizedTitle = `${(docForm.title || "generated")
     .replace(/[^a-zA-Z0-9-_]/g, "_") // Replace unsafe characters with underscores
     .substring(0, 50)}`; // Limit length to 50 characters
-    const filename = `${sanitizedTitle}.pdf`;
+    const filename = encodeURIComponent(`${sanitizedTitle}.pdf`);
 
-    // Send the PDF as a response
-    res.set({
-      "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="${filename}"`,
+    res.download(outputPdfPath, filename, (err) => {
+      if (err) {
+        console.error("Download error:", err);
+        res.status(500).send("Failed to send PDF");
+      }
     });
-    res.sendFile(outputPdfPath);
-
+ 
     // Clean up temporary files after a delay
     setTimeout(async () => {
       try {
@@ -177,17 +169,17 @@ app.post("/generate-json", (req, res) => {
     const jsonPath = path.resolve(__dirname, "form-data.json");
     fs.writeFileSync(jsonPath, JSON.stringify(docForm, null, 2));
 
-    const sanitizedTitle = (docForm.title || "generated")
+    const sanitizedTitle = `${(docForm.title || "generated")
     .replace(/[^a-zA-Z0-9-_]/g, "_") // Replace unsafe characters with underscores
-    .substring(0, 50); // Limit length to 50 characters
-    const filename = `${sanitizedTitle}.pdf`;
+    .substring(0, 50)}`; // Limit length to 50 characters
+    const filename = encodeURIComponent(`${sanitizedTitle}.json`);
 
-    // Send JSON file to client
-    res.set({
-      "Content-Type": "application/json",
-      "Content-Disposition": `attachment; filename="${filename}"`,
+    res.download(jsonPath, filename, (err) => {
+      if (err) {
+        console.error("Download error:", err);
+        res.status(500).send("Failed to send JSON");
+      }
     });
-    res.sendFile(jsonPath);
   } catch (err) {
     console.error("Error generating JSON:", err);
     res.status(500).send("Failed to generate JSON.");
@@ -276,7 +268,6 @@ async function getNextProposalCounter() {
 }
 
 // Serve static files if needed (e.g., for testing thumbnails)
-//app.use('/thumbnails', express.static(path.join(__dirname, 'thumbnails')));
 app.use('/thumbnails', express.static(path.join(THUMB_DIR)));
 
 // API route to list image paths
@@ -319,6 +310,11 @@ app.get('/api/images', async (req, res) => {
     console.error('Error generating thumbnails:', err);
     res.status(500).json({ error: 'Could not process images.' });
   }
+});
+
+app.get('/next-proposal-id', async (req, res) => {
+  const proposalId = await getNextProposalCounter();
+  res.json({ proposalId });
 });
 
 // Start the server
