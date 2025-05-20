@@ -1035,12 +1035,21 @@
     showTab(currentTab); // Ensure first tab is visible
     initStateCityZipForm();
 
-    // Reinitialize comma formatting for dynamically added price inputs
-    //document.getElementById("investment-container").addEventListener("DOMNodeInserted", (e) => {
-    //  if (e.target.tagName === "INPUT" && e.target.name === "investPrice") {
-    //    numberWithCommas(e.target);
-    //  }
-    //});
+    const checkboxState = [
+      {id: "summaryBool", sectionId: "summary-section"},
+      {id: "serviceBool", sectionId: "service-section"}
+    ];
+
+    checkboxState.forEach(({id, sectionId}) => {
+      const checkbox = document.getElementById(id);
+      const section = document.getElementById(sectionId);
+      if (checkbox && section) {
+        const fields = section.querySelectorAll("input, textarea, button");
+        fields.forEach(field => {
+          field.disabled = !checkbox.checked;
+        })
+      }
+    });
 
     observer.observe(investmentContainer, {
       childList: true,
