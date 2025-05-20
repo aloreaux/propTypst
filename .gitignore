@@ -4,3 +4,4 @@ node_modules/
 *.json
 tmp/
 public/assets/thumbnails
+/data/proposal_counter.txt
