@@ -95,7 +95,7 @@
   function addSummarySection() {
     const section = document.getElementById('summary-section');
     const summaryDiv = document.createElement('div');
-    summaryDiv.className = 'nested-section sum-section'; // Added 'equip-room' class
+    summaryDiv.className = 'nested-section summary-section'; // Added 'equip-room' class
     summaryDiv.innerHTML = `
             <div class="col-md-6">
             <label class="form-label">Summary Name: <input type="text" name="summarySectionName" placeholder="Summary Name" class="form-control" required /></label>
@@ -322,6 +322,14 @@
       if (field) {
         if (field.type === "checkbox") {
           field.checked = data[key];
+          // Dynamically update all checkboxes based on JSON data
+          form.querySelectorAll('input[type="checkbox"]').forEach((checkbox) => {
+            const name = checkbox.name;
+
+            // If the checkbox key exists in the JSON, use its value
+            // If it doesn't exist, default to unchecked
+            checkbox.checked = !!data[name];
+          });
         } else {
           field.value = data[key];
         }
@@ -382,7 +390,7 @@
     }
 
     /** ✅ Handle Summary Sections **/
-    const summarySections = document.querySelectorAll(".sum-section");
+    const summarySections = document.querySelectorAll(".summary-section");
     console.log(`🔹 Found ${summarySections.length} summary sections.`); // Debug log
 
     if (summarySections.length === 0) {
@@ -472,6 +480,22 @@
         }
       }
     }
+
+    // Dynamically toggle all sections based on checkbox states
+    document.querySelectorAll('input[type="checkbox"][id$="Bool"]').forEach(checkbox => {
+      const idPrefix = checkbox.id.replace("Bool", "");
+      const section = document.getElementById(`${idPrefix}-section`);
+      if (!section) return;
+
+      const isEnabled = checkbox.checked;
+      section.querySelectorAll("input, textarea, button, select").forEach(field => {
+        field.disabled = !isEnabled;
+      });
+    });
+
+    document.querySelectorAll('input[type="checkbox"][id$="Bool"]').forEach(cb => {
+      cb.dispatchEvent(new Event("change"));
+    });
   }
 
   function initializeDragAndDrop() {
@@ -572,7 +596,7 @@
     });
 
     //// Select all dynamically added summary sections
-    const summarySections = document.querySelectorAll(".sum-section");
+    const summarySections = document.querySelectorAll(".summary-section");
 
     summarySections.forEach((section) => {
       const summaryName = section.querySelector("input.section-title")?.value.trim(); // ✅ Get section name
@@ -637,6 +661,14 @@
 
   var currentTab = 0; // Current tab is set to be the first tab (0)
   showTab(currentTab); // Display the current tab
+
+  function updateNextBtnState() {
+    // Only care when we're on tab 0 (Step 1)
+    if (currentTab !== 0) return;
+
+    const hasImage = document.getElementById("imgpath").value.trim() !== "";
+    document.getElementById("nextBtn").disabled = !hasImage;
+  }
 
   function showTab(n) {
     var tabs = document.getElementsByClassName("tab");
@@ -706,7 +738,7 @@
   }
 
   function addField(button, isParagraph) {
-    const section = button.closest(".sum-section");
+    const section = button.closest(".summary-section");
     const container = section.querySelector(".summary-items");
 
     if (!container) {
@@ -714,7 +746,7 @@
       return;
     }
 
-    const sectionTitle = button.closest('.sum-section').querySelector('input.section-title').value.trim();
+    const sectionTitle = button.closest('.summary-section').querySelector('input.section-title').value.trim();
     const sectionKey = sectionTitle.toLowerCase().replace(/\s+/g, '_');
 
     if (isParagraph) {
@@ -748,7 +780,7 @@
 
   // Allow users to edit section names
   function editSectionName(button) {
-    var section = button.closest('.sum-section');
+    var section = button.closest('.summary-section');
     var titleInput = section.querySelector('.section-title');
 
     titleInput.removeAttribute('disabled');
@@ -758,7 +790,7 @@
 
   // Save section name after editing
   function saveSectionName(button) {
-    var section = button.closest('.sum-section');
+    var section = button.closest('.summary-section');
     var titleInput = section.querySelector('.section-title');
 
     titleInput.setAttribute('disabled', 'true');
@@ -768,7 +800,7 @@
 
   // Toggle input/textarea fields dynamically
   function togglePar(section, isPar) {
-    const sectionContainer = document.querySelector(`.sum-section input[value="${section}"]`)?.closest('.sum-section');
+    const sectionContainer = document.querySelector(`.summary-section input[value="${section}"]`)?.closest('.summary-section');
 
     if (!sectionContainer) {
       console.error("Section not found:", section);
@@ -858,11 +890,15 @@
   }
 
   document.getElementById("summaryBool").addEventListener("change", function () {
-    const sumSection = document.getElementById("summary-section");
     const isEnabled = this.checked;
 
-    const fields = sumSection.querySelectorAll("input:not(.section-title), textarea, button");
-    fields.forEach(field => {field.disabled = !isEnabled;});
+    // Update every summary card so its inputs *and* dropdown reflect the new state
+    document
+      .querySelectorAll("#summary-section .summary-section")
+      .forEach((card) => {
+        const sectionName = card.dataset.section;  // e.g. "Objective"
+        toggleSection(sectionName, isEnabled);     // updates fields + menu items
+      });
   });
 
   document.getElementById("equipBool").addEventListener("change", function () {
@@ -894,6 +930,10 @@
     const container = document.getElementById('thumbnail-container');
     container.innerHTML = ''; // clear previous
 
+    // reset <section>
+    document.getElementById("imgpath").value = "";
+    updateNextBtnState();
+
     try {
       const res = await fetch(`/api/images?category=${category}`);
       const images = await res.json();
@@ -908,6 +948,7 @@
           document.getElementById('imgpath').value = full;
           container.querySelectorAll('img').forEach(i => i.classList.remove('selected'));
           img.classList.add('selected');
+          updateNextBtnState();
         });
 
         container.appendChild(img);
@@ -1050,6 +1091,8 @@
         })
       }
     });
+
+    updateNextBtnState();
 
     observer.observe(investmentContainer, {
       childList: true,
