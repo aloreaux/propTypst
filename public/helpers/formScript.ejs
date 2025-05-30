@@ -477,9 +477,12 @@
 
         if (selectedImg) {
           selectedImg.classList.add("selected");
+          document.getElementById("imgpath").value = data.imgpath;
         }
       }
+      updateNextBtnState();
     }
+
 
     // Dynamically toggle all sections based on checkbox states
     document.querySelectorAll('input[type="checkbox"][id$="Bool"]').forEach(checkbox => {
