@@ -59,7 +59,8 @@ app.post("/generate-pdf", async (req, res) => {
   docForm.ny = !!docForm.ny;
 
   const match = docForm.imgpath.match(/assets\/([^/]+)\//);
-  const category = match ? match[1] : 'default';
+  //const category = match ? match[1] : 'default';
+  const category = req.body['img-category'];
 
   // Handle image paths
   docForm.cornerimg = `assets/${category}/${category}.svg`;

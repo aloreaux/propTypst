@@ -9,6 +9,22 @@
 
   const investmentContainer = document.getElementById("investment-container");
 
+    // New: All categories to fetch. Adjust if you add/remove categories.
+  const ALL_IMAGE_CATEGORIES = [
+    'athletics',
+    'business',
+    'firedept',
+    'grow',
+    'healthcare',
+    'higheredu',
+    'industrial',
+    'military',
+    'museum',
+    'publicsafety'
+  ];
+  
+  let allThumbnails = [];
+
   const observer = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
       if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
@@ -929,7 +945,7 @@
     }
   });
 
-  async function loadThumbnailsForCategory(category) {
+  /*async function loadThumbnailsForCategory(category) {
     const container = document.getElementById('thumbnail-container');
     container.innerHTML = ''; // clear previous
 
@@ -959,7 +975,65 @@
     } catch (err) {
       console.error("Error loading thumbnails:", err);
     }
-  }
+  }*/
+
+    // ─────────────────────────────────────────────────────────────────
+  // 4) Given allThumbnails[], split into chunks of four and
+  //    generate a <div class="carousel-item"> … </div> for each chunk.
+  //    Append those items into #carousel-inner.
+  // ─────────────────────────────────────────────────────────────────
+  function buildCarousel() {
+    const inner = document.getElementById('carousel-inner');
+    inner.innerHTML = ''; // clear any previous slides
+
+    // 4a) Break allThumbnails into arrays of 4 each
+    const chunked = [];
+    for (let i = 0; i < allThumbnails.length; i += 4) {
+      chunked.push(allThumbnails.slice(i, i + 4));
+    }
+
+    // 4b) For each chunk, create a <div class="carousel-item"> containing those 4 <img> tags
+    chunked.forEach((imgs, idx) => {
+      const slide = document.createElement('div');
+      slide.className = 'carousel-item' + (idx === 0 ? ' active' : '');
+
+      // Use a flex container so the 4 images sit side by side
+      const row = document.createElement('div');
+      row.className = 'd-flex justify-content-center align-items-center';
+
+      imgs.forEach(({ thumb, full }) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'thumb-wrapper';
+
+        const img = document.createElement('img');
+        img.src = thumb;
+        img.alt = full;
+        img.className = 'thumbnail';
+
+        img.addEventListener('click', () => {
+          // When clicked, set #imgpath, highlight border, and enable Next if needed
+          document.getElementById('imgpath').value = full;
+          inner
+            .querySelectorAll('img.thumbnail')
+            .forEach(i => i.classList.remove('selected'));
+          img.classList.add('selected');
+          updateNextBtnState();
+        });
+
+        wrapper.appendChild(img);
+        row.appendChild(wrapper);
+      });
+
+      slide.appendChild(row);
+      inner.appendChild(slide);
+    });
+
+    // If there are no images at all, you might hide the carousel controls:
+    if (allThumbnails.length === 0) {
+      document.querySelector('#thumbnail-carousel .carousel-control-prev').style.display = 'none';
+      document.querySelector('#thumbnail-carousel .carousel-control-next').style.display = 'none';
+    }
+  } 
 
   async function initStateCityZipForm() {
     const stateSelect = document.getElementById("state");
@@ -984,6 +1058,31 @@
 
     } catch (err) {
       console.error("Failed to initialize form:", err);
+    }
+  }
+
+  async function loadAllThumbnails() {
+    allThumbnails = [];
+    document.getElementById('imgpath').value = '';
+    updateNextBtnState();
+
+    try {
+      // If you have a single endpoint that returns absolutely all images (no filtering by category),
+      // you could do:
+      //   const res = await fetch('/api/images');
+      //   allThumbnails = await res.json();
+      //   return buildCarousel();
+
+      // Otherwise, loop categories one by one:
+      for (const category of ALL_IMAGE_CATEGORIES) {
+        const res = await fetch(`/api/images?category=${category}`);
+        if (!res.ok) throw new Error(`Failed to load ${category}`);
+        const images = await res.json(); // expected: array of { thumb, full }
+        images.forEach(imgObj => allThumbnails.push(imgObj));
+      }
+      buildCarousel(); // now that allThumbnails[] is filled, build slides
+    } catch (err) {
+      console.error('Error loading thumbnails:', err);
     }
   }
 
@@ -1052,10 +1151,11 @@
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    const defaultCategory = "business";
+    loadAllThumbnails();
+    //const defaultCategory = "business";
 
-    document.getElementById("img-category").value = defaultCategory;
-    loadThumbnailsForCategory(defaultCategory);
+    //document.getElementById("img-category").value = defaultCategory;
+    //loadThumbnailsForCategory(defaultCategory);
     // Add default "Freight" section
     addInvestSection("Freight", ["SHIPPER PREPAYS FREIGHT – ADDS TO CUSTOMER INVOICE", "Due to volatility in freight charges, the shipping cost provided on this quote is an ESTIMATE only. Freight costs and the number of truckloads may change. The actual freight cost will be charged at the time of shipment OR on the final invoice."], ""); // Predefined items and empty price
     const textareas = document.querySelectorAll("textarea");
