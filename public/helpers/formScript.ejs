@@ -481,7 +481,7 @@
     }
 
     // Handle the dropdown explicitly
-    const category = form.querySelector('[name="img-category"]').value;
+    /*const category = form.querySelector('[name="img-category"]').value;
     if (category) {
       await loadThumbnailsForCategory(category);
 
@@ -497,8 +497,7 @@
         }
       }
       updateNextBtnState();
-    }
-
+    }*/
 
     // Dynamically toggle all sections based on checkbox states
     document.querySelectorAll('input[type="checkbox"][id$="Bool"]').forEach(checkbox => {
@@ -515,6 +514,15 @@
     document.querySelectorAll('input[type="checkbox"][id$="Bool"]').forEach(cb => {
       cb.dispatchEvent(new Event("change"));
     });
+
+    await loadAllThumbnails();
+
+    if (data.imgpath) {
+      scrollToImage(data.imgpath);
+      document.getElementById("imgpath").value = data.imgpath;
+    }
+
+    updateNextBtnState();
   }
 
   function initializeDragAndDrop() {
@@ -682,6 +690,8 @@
   showTab(currentTab); // Display the current tab
 
   function updateNextBtnState() {
+    /*console.log("updateNextBtnState – currentTab:", currentTab,
+              "imgpath:", document.getElementById("imgpath").value);*/
     // Only care when we're on tab 0 (Step 1)
     if (currentTab !== 0) return;
 
@@ -936,14 +946,14 @@
     fields.forEach(field => {field.disabled = !isEnabled;});
   });
 
-  document.getElementById('img-category').addEventListener('change', async (event) => {
+  /*document.getElementById('img-category').addEventListener('change', async (event) => {
     const category = event.target.value;
     try {
       await loadThumbnailsForCategory(category);
     } catch (err) {
       console.error("function failed: ", err);
     }
-  });
+  });*/
 
   /*async function loadThumbnailsForCategory(category) {
     const container = document.getElementById('thumbnail-container');
@@ -982,36 +992,42 @@
   //    generate a <div class="carousel-item"> … </div> for each chunk.
   //    Append those items into #carousel-inner.
   // ─────────────────────────────────────────────────────────────────
+
   function buildCarousel() {
     const inner = document.getElementById('carousel-inner');
     inner.innerHTML = ''; // clear any previous slides
 
-    // 4a) Break allThumbnails into arrays of 4 each
+    // 1) Break allThumbnails into groups of 4
     const chunked = [];
     for (let i = 0; i < allThumbnails.length; i += 4) {
       chunked.push(allThumbnails.slice(i, i + 4));
     }
 
-    // 4b) For each chunk, create a <div class="carousel-item"> containing those 4 <img> tags
+    // 2) For each group of 4, create a <div class="carousel-item"> with a 2×2 grid
     chunked.forEach((imgs, idx) => {
+      // Create the slide container; mark the first one active
       const slide = document.createElement('div');
       slide.className = 'carousel-item' + (idx === 0 ? ' active' : '');
 
-      // Use a flex container so the 4 images sit side by side
+      // Inside each slide, use a <div class="row"> so that
+      // four <div class="col-6"> elements automatically wrap into two rows.
       const row = document.createElement('div');
-      row.className = 'd-flex justify-content-center align-items-center';
+      row.className = 'row gx-1 gy-2 justify-content-center';
 
+      // 3) For each of the (up to) four thumbnails in this chunk:
       imgs.forEach(({ thumb, full }) => {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'thumb-wrapper';
+        // Create a half‐width column (col-6) so two images per row:
+        const col = document.createElement('div');
+        col.className = 'col-6 text-center';
 
         const img = document.createElement('img');
         img.src = thumb;
         img.alt = full;
         img.className = 'thumbnail';
+        // The <img> naturally stays at 285×380 (no override in CSS)
 
         img.addEventListener('click', () => {
-          // When clicked, set #imgpath, highlight border, and enable Next if needed
+          // When clicked, record the “full” path and highlight it:
           document.getElementById('imgpath').value = full;
           inner
             .querySelectorAll('img.thumbnail')
@@ -1020,20 +1036,82 @@
           updateNextBtnState();
         });
 
-        wrapper.appendChild(img);
-        row.appendChild(wrapper);
+        col.appendChild(img);
+        row.appendChild(col);
       });
+
+      // 4) If this chunk has fewer than 4 images (e.g. last slide),
+      //    fill empty spots so Bootstrap still reserves the right layout:
+      for (let j = imgs.length; j < 4; j++) {
+        const emptyCol = document.createElement('div');
+        emptyCol.className = 'col-6';
+        row.appendChild(emptyCol);
+      }
 
       slide.appendChild(row);
       inner.appendChild(slide);
     });
 
-    // If there are no images at all, you might hide the carousel controls:
+    // 5) If there are no thumbnails at all, hide the carousel controls:
     if (allThumbnails.length === 0) {
-      document.querySelector('#thumbnail-carousel .carousel-control-prev').style.display = 'none';
-      document.querySelector('#thumbnail-carousel .carousel-control-next').style.display = 'none';
+      document
+        .querySelector('#thumbnail-carousel .carousel-control-prev')
+        .style.display = 'none';
+      document
+        .querySelector('#thumbnail-carousel .carousel-control-next')
+        .style.display = 'none';
     }
-  } 
+  }
+
+  /**
+ * scrollToImage:
+ *   1) Find the index of fullPath within allThumbnails[]
+ *   2) Compute its slide as Math.floor(idx/4)
+ *   3) Tell Bootstrap’s carousel to go to that slide
+ *   4) Once the slide transition completes, add `.selected` to that <img>
+ */
+  function scrollToImage(fullPath) {
+    // 1) Find the position in allThumbnails
+    const idx = allThumbnails.findIndex(obj => obj.full === fullPath);
+    if (idx === -1) {
+      // not found—nothing to do
+      return;
+    }
+
+    // 2) Compute which slide (0-based) holds this thumbnail
+    const slideIndex = Math.floor(idx / 4);
+
+    // 3) Grab the carousel element & ensure there's a Carousel instance
+    const carouselEl = document.getElementById('thumbnail-carousel');
+    let carouselInstance = bootstrap.Carousel.getInstance(carouselEl);
+    if (!carouselInstance) {
+      // If none exists yet, create one (disable auto‐cycling)
+      carouselInstance = new bootstrap.Carousel(carouselEl, { interval: false });
+    }
+
+    // 4) Move to that slideIndex
+    carouselInstance.to(slideIndex);
+
+    // 5) After the slide finishes transitioning, apply `.selected`
+    //    We listen for the 'slid.bs.carousel' event just once
+    carouselEl.addEventListener('slid.bs.carousel', function handler() {
+      carouselEl.removeEventListener('slid.bs.carousel', handler);
+
+      // Remove `.selected` from any previously highlighted <img>
+      carouselEl.querySelectorAll('img.thumbnail').forEach(img => {
+        img.classList.remove('selected');
+      });
+
+      // Find the exact <img> with alt===fullPath, add .selected
+      const allImgs = carouselEl.querySelectorAll('img.thumbnail');
+      for (const img of allImgs) {
+        if (img.alt === fullPath) {
+          img.classList.add('selected');
+          break;
+        }
+      }
+    });
+  }
 
   async function initStateCityZipForm() {
     const stateSelect = document.getElementById("state");
