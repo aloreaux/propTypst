@@ -60,13 +60,23 @@ textarea.form-control {
 
 .carousel-control-next,
 .carousel-control-prev {
-  width: 10%;
+  width: 5%;
   background: #666666;
-  opacity: 0.6;
+  opacity: 0;
+  border: none;
+}
+
+.carousel-control-prev:hover,
+.carousel-control-next:hover {
+  opacity: 1;
 }
 
 #thumbnail-carousel .carousel-item {
   /* 380px (image height) × 2 rows = 760px,
      plus a small gap (e.g. 0.5rem ≈ 8px) between rows = ~768px total. */
   min-height: 768px;
+}
+
+#thumb-col > .col-6:nth-child(-n+2) {
+  padding-bottom: 1rem;
 }

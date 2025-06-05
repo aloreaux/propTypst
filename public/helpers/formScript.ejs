@@ -1012,13 +1012,14 @@
       // Inside each slide, use a <div class="row"> so that
       // four <div class="col-6"> elements automatically wrap into two rows.
       const row = document.createElement('div');
-      row.className = 'row gx-1 gy-2 justify-content-center';
+      row.className = 'row pe-2 justify-content-center';
+      row.id = "thumb-col"
 
       // 3) For each of the (up to) four thumbnails in this chunk:
       imgs.forEach(({ thumb, full }) => {
         // Create a half‐width column (col-6) so two images per row:
         const col = document.createElement('div');
-        col.className = 'col-6 text-center';
+        col.className = 'col-6';
 
         const img = document.createElement('img');
         img.src = thumb;
