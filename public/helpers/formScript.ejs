@@ -2,6 +2,7 @@
   const form = document.getElementById("pdf-form");
   let jsonGenerated = false;
   let downloadTriggered = false;
+  let currenntDragElement = null;
 
   const jsonBtn = document.getElementById("generate-json");
   const pdfBtn = document.getElementById("generate-pdf");
@@ -69,7 +70,7 @@
 
   function addEquipSection() {
     const section = document.getElementById('equipment-section');
-    const equipDiv = document.createElement('div');
+/*    const equipDiv = document.createElement('div');
     equipDiv.className = 'card nested-section equip-room mb-2'; // Added 'equip-room' class
     equipDiv.innerHTML = `
         <div class="col-md p-2">
@@ -82,7 +83,13 @@
             <div class="equip-items"></div>
         </div>
         `;
-    section.appendChild(equipDiv);
+    section.appendChild(equipDiv);*/
+    const tmpl = document.getElementById('tmpl-equip-room');
+    if (!tmpl) { return };
+
+    const clone = tmpl.content.cloneNode(true);
+    section.appendChild(clone);
+    initializeDragAndDrop();
   }
 
   function addEquipItem(button) {
@@ -97,21 +104,24 @@
       console.error('Equip items container not found!');
       return;
     }
-    const itemDiv = document.createElement("div");
+/*    const itemDiv = document.createElement("div");
     itemDiv.className = 'input-group mt-2';
     itemDiv.innerHTML = `
             <span class="input-group-text">Item</span>
             <input type="text" name="equipItem" class="form-control" required />
             <button type="button" class="btn btn-danger" onclick="this.parentNode.remove()"><i class="bi bi-x-square-fill"></i></button>
     `;
-    equipItemsContainer.appendChild(itemDiv);
-
+    equipItemsContainer.appendChild(itemDiv);*/
+    const tmplItem = document.getElementById('tmpl-equip-item');
+    const cloneItem = tmplItem.content.cloneNode(true);
+    equipItemsContainer.appendChild(cloneItem);
+    initializeDragAndDrop();
   }
 
   function addSummarySection() {
     const section = document.getElementById('summary-section');
     const summaryDiv = document.createElement('div');
-    summaryDiv.className = 'nested-section summary-section'; // Added 'equip-room' class
+    summaryDiv.className = 'nested-section summary-section';
     summaryDiv.innerHTML = `
             <div class="col-md-6">
             <label class="form-label">Summary Name: <input type="text" name="summarySectionName" placeholder="Summary Name" class="form-control" required /></label>
@@ -143,7 +153,7 @@
       return;
     }
 
-    const investDiv = document.createElement("div");
+    /*const investDiv = document.createElement("div");
     investDiv.className = "card nested-section invest-section mb-2";
     investDiv.setAttribute("draggable", true); // Enable drag-and-drop
     investDiv.innerHTML = `
@@ -178,6 +188,33 @@
         </div>
         </div>
         `;
+        */
+    const tmplInvestSection = document.getElementById("tmpl-invest-section");
+    if (!tmplInvestSection) {
+      console.error("Template #tmpl-invest-section not found!");
+      return;
+    }
+
+    const clone = tmplInvestSection.content.cloneNode(true);
+    const investDiv = clone.querySelector(".invest-section");
+    if(!investDiv) {
+      console.error("Clone did not yield .invest-section");
+      return;
+    }
+    investDiv.querySelector('input[name="investSectionName"]').value = name;
+    investDiv.querySelector('input[name="investPrice"]').value = price;
+
+    const itemsContainer = investDiv.querySelector(".invest-items");
+    items.forEach((text) => {
+      const tmplItem = document.getElementById("tmpl-invest-item");
+      const itemClone = tmplItem.content.cloneNode(true);
+      const itemDiv = itemClone.querySelector(".input-group");
+
+      if (itemDiv) {
+        itemDiv.querySelector('textarea[name="investItem"]').textContent = text;
+        itemsContainer.appendChild(itemDiv);
+      }
+    });
 
     container.appendChild(investDiv);
     initializeDragAndDrop();
@@ -205,14 +242,17 @@
       return;
     }
 
-    const itemDiv = document.createElement("div");
+    /*const itemDiv = document.createElement("div");
     itemDiv.className = 'input-group px-2 pb-2';
     itemDiv.innerHTML = `
             <span class="input-group-text">Item</span>
             <textarea class="form-control" rows=1 name="investItem" required></textarea>
             <button type="button" class="btn btn-danger" onclick="this.parentNode.remove()"><i class="bi bi-x-square-fill"></i></button>
-    `;
-    investItemsContainer.appendChild(itemDiv);
+    `;*/
+    const tmplItem = document.getElementById('tmpl-invest-item');
+    const investItemClone = tmplItem.content.cloneNode(true);
+    investItemsContainer.appendChild(investItemClone);
+    initializeDragAndDrop();
   }
 
   /** Generate JSON */
@@ -525,7 +565,7 @@
     updateNextBtnState();
   }
 
-  function initializeDragAndDrop() {
+  /*function initializeDragAndDrop() {
     const sections = document.querySelectorAll(".invest-section");
     sections.forEach((section) => {
       section.addEventListener("dragstart", () => {
@@ -555,7 +595,89 @@
         }
       });
     });
+  }*/
+
+  function initializeDragAndDrop() {
+    const sectionContainers = document.querySelectorAll(".section-container");
+
+    sectionContainers.forEach(container => {
+      const sections = container.querySelectorAll(".nested-section");
+
+      sections.forEach(section => {
+        // Make section draggable
+        //section.setAttribute("draggable", true);
+
+        section.addEventListener("dragstart", (e) => {
+          currentDragElement = section;
+          section.style.opacity = "0.5";
+        });
+
+        section.addEventListener("dragend", () => {
+          section.style.opacity = "1";
+          currentDragElement = null;
+        });
+      });
+
+      // SECTION CONTAINER DROP TARGET
+      container.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        console.log("CONTAINER DRAG ELEMENT: ", currentDragElement);
+
+        const target = e.target.closest(".nested-section");
+        if (!target || target === currentDragElement) return;
+
+        const targetRect = target.getBoundingClientRect();
+        const offset = e.clientY - targetRect.top;
+
+        if (offset > targetRect.height / 2) {
+          container.insertBefore(currentDragElement, target.nextSibling);
+        } else {
+          container.insertBefore(currentDragElement, target);
+        }
+      });
+    });
+
+    // ITEM-LEVEL drag/drop
+    document.querySelectorAll(".nested-section").forEach(section => {
+      const itemContainer = section.querySelector("[class$='-items']");
+      if (!itemContainer) return;
+
+      const items = itemContainer.querySelectorAll(".input-group");
+
+      items.forEach(item => {
+        //item.setAttribute("draggable", true);
+
+        item.addEventListener("dragstart", (e) => {
+          e.stopPropagation(); // prevent bubbling up to section drag
+          currentDragElement = item;
+          item.style.opacity = "0.5";
+        });
+
+        item.addEventListener("dragend", () => {
+          item.style.opacity = "1";
+          currentDragElement = null;
+        });
+      });
+
+      // ITEM CONTAINER DROP TARGET
+      itemContainer.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        console.log("ITEM-LEVEL DRAG ELEMENT: ", currentDragElement);
+        const target = e.target.closest(".input-group");
+        if (!target || target === currentDragElement) return;
+
+        const targetRect = target.getBoundingClientRect();
+        const offset = e.clientY - targetRect.top;
+
+        if (offset > targetRect.height / 2) {
+          itemContainer.insertBefore(currentDragElement, target.nextSibling);
+        } else {
+          itemContainer.insertBefore(currentDragElement, target);
+        }
+      });
+    });
   }
+
   function addCommas(x) {
     return x.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
   }
@@ -1257,6 +1379,7 @@
 
     showTab(currentTab); // Ensure first tab is visible
     initStateCityZipForm();
+    initializeDragAndDrop();
 
     const checkboxState = [
       {id: "summaryBool", sectionId: "summary-section"},
