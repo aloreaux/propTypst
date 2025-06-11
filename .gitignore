@@ -5,3 +5,4 @@ node_modules/
 tmp/
 public/assets/thumbnails
 data/proposal_counter.txt
+*.DS_Store
