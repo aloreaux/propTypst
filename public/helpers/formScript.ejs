@@ -70,20 +70,6 @@
 
   function addEquipSection() {
     const section = document.getElementById('equipment-section');
-/*    const equipDiv = document.createElement('div');
-    equipDiv.className = 'card nested-section equip-room mb-2'; // Added 'equip-room' class
-    equipDiv.innerHTML = `
-        <div class="col-md p-2">
-            <div class="input-group">
-              <span class="input-group-text">Room Name</span>
-              <input type="text" name="equipRoomName" placeholder="Room Name" class="form-control" required />
-              <button type="button" class="btn btn-primary" onclick="addEquipItem(this)">Add Item</button>
-              <button type="button" class="btn btn-danger" onclick="this.closest('.equip-room').remove()">Remove Room</button>
-            </div>
-            <div class="equip-items"></div>
-        </div>
-        `;
-    section.appendChild(equipDiv);*/
     const tmpl = document.getElementById('tmpl-equip-room');
     if (!tmpl) { return };
 
@@ -104,14 +90,7 @@
       console.error('Equip items container not found!');
       return;
     }
-/*    const itemDiv = document.createElement("div");
-    itemDiv.className = 'input-group mt-2';
-    itemDiv.innerHTML = `
-            <span class="input-group-text">Item</span>
-            <input type="text" name="equipItem" class="form-control" required />
-            <button type="button" class="btn btn-danger" onclick="this.parentNode.remove()"><i class="bi bi-x-square-fill"></i></button>
-    `;
-    equipItemsContainer.appendChild(itemDiv);*/
+
     const tmplItem = document.getElementById('tmpl-equip-item');
     const cloneItem = tmplItem.content.cloneNode(true);
     equipItemsContainer.appendChild(cloneItem);
@@ -153,42 +132,6 @@
       return;
     }
 
-    /*const investDiv = document.createElement("div");
-    investDiv.className = "card nested-section invest-section mb-2";
-    investDiv.setAttribute("draggable", true); // Enable drag-and-drop
-    investDiv.innerHTML = `
-        <div class="row p-2">
-            <div class="col-md-6">
-                <div class="input-group">
-                    <span class="input-group-text">Section Name</span>
-                    <input type="text" name="investSectionName" value="${name}" class="form-control" required />
-                    <button type="button" class="btn btn-primary" onclick="addInvestItem(this)">Add Item</button>
-                </div>
-            </div>
-            <div class="col-6">
-                <div class="input-group">
-                    <span class="input-group-text">Price</span><input type="text" name="investPrice" value="${price}" class="form-control" /></label>
-                    <button type="button" class="btn btn-danger" onclick="this.closest('.invest-section').remove()">Remove Section</button>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-        <div class="invest-items col-md">
-            ${items
-        .map(
-          (item) => `
-                <div class="input-group px-2 pb-2">
-                <span class="input-group-text">Item</span>
-                <textarea class="form-control" rows="1" name="investItem" required>${item}</textarea>
-                <button type="button" class="btn btn-danger" onclick="this.parentNode.remove()"><i class="bi bi-x-square-fill"></i></button>
-                </div>
-            `
-        )
-        .join("")}
-        </div>
-        </div>
-        `;
-        */
     const tmplInvestSection = document.getElementById("tmpl-invest-section");
     if (!tmplInvestSection) {
       console.error("Template #tmpl-invest-section not found!");
@@ -244,13 +187,6 @@
       return;
     }
 
-    /*const itemDiv = document.createElement("div");
-    itemDiv.className = 'input-group px-2 pb-2';
-    itemDiv.innerHTML = `
-            <span class="input-group-text">Item</span>
-            <textarea class="form-control" rows=1 name="investItem" required></textarea>
-            <button type="button" class="btn btn-danger" onclick="this.parentNode.remove()"><i class="bi bi-x-square-fill"></i></button>
-    `;*/
     const tmplItem = document.getElementById('tmpl-invest-item');
     const investItemClone = tmplItem.content.cloneNode(true);
     investItemsContainer.appendChild(investItemClone);
@@ -522,25 +458,6 @@
       });
     }
 
-    // Handle the dropdown explicitly
-    /*const category = form.querySelector('[name="img-category"]').value;
-    if (category) {
-      await loadThumbnailsForCategory(category);
-
-      // Highlight the selected thumbnail based on saved imgpath
-      if (data.imgpath) {
-        const container = document.getElementById("thumbnail-container");
-        const selectedImg = Array.from(container.querySelectorAll("img"))
-          .find(img => img.alt === data.imgpath);
-
-        if (selectedImg) {
-          selectedImg.classList.add("selected");
-          document.getElementById("imgpath").value = data.imgpath;
-        }
-      }
-      updateNextBtnState();
-    }*/
-
     // Dynamically toggle all sections based on checkbox states
     document.querySelectorAll('input[type="checkbox"][id$="Bool"]').forEach(checkbox => {
       const idPrefix = checkbox.id.replace("Bool", "");
@@ -566,107 +483,7 @@
 
     updateNextBtnState();
   }
-
-  /*function initializeDragAndDrop() {
-    const sections = document.querySelectorAll(".invest-section");
-    sections.forEach((section) => {
-      section.addEventListener("dragstart", () => {
-        currentDragElement = section;
-        section.style.opacity = "0.5";
-      });
-
-      section.addEventListener("dragend", () => {
-        section.style.opacity = "1";
-        currentDragElement = null;
-      });
-
-      section.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        const container = document.getElementById("investment-container");
-        const target = e.target.closest(".invest-section");
-
-        if (target && target !== currentDragElement) {
-          const targetRect = target.getBoundingClientRect();
-          const offset = e.clientY - targetRect.top;
-
-          if (offset > targetRect.height / 2) {
-            container.insertBefore(currentDragElement, target.nextSibling);
-          } else {
-            container.insertBefore(currentDragElement, target);
-          }
-        }
-      });
-    });
-  }*/
-
-  let currentDragElement = null;
-
-  /*function initializeDragAndDrop() {
-    // Sections (invest-section, equip-room)
-    document.querySelectorAll(".section-container").forEach(container => {
-      container.querySelectorAll(".nested-section").forEach(section => {
-        section.setAttribute("draggable", true);
-
-        section.addEventListener("dragstart", (e) => {
-          currentDragElement = section;
-          e.dataTransfer.setData("text/plain", "section");
-          e.dataTransfer.effectAllowed = "move";
-          section.classList.add("dragging");
-        });
-
-        section.addEventListener("dragend", () => {
-          section.classList.remove("dragging");
-          currentDragElement = null;
-        });
-      });
-
-      container.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        const dragging = currentDragElement;
-        const target = e.target.closest(".nested-section");
-        if (!dragging || !target || dragging === target || !dragging.classList.contains("nested-section")) return;
-
-        const rect = target.getBoundingClientRect();
-        const after = (e.clientY - rect.top) > rect.height / 2;
-        container.insertBefore(dragging, after ? target.nextSibling : target);
-      });
-    });
-
-    // Items (input-group inside *-items)
-    document.querySelectorAll(".nested-section").forEach(section => {
-      const itemContainer = section.querySelector("[class$='-items']");
-      if (!itemContainer) return;
-
-      itemContainer.querySelectorAll(".input-group").forEach(item => {
-        item.setAttribute("draggable", true);
-
-        item.addEventListener("dragstart", (e) => {
-          e.stopPropagation(); // prevent bubbling to section
-          currentDragElement = item;
-          e.dataTransfer.setData("text/plain", "item");
-          e.dataTransfer.effectAllowed = "move";
-          item.classList.add("dragging");
-        });
-
-        item.addEventListener("dragend", () => {
-          item.classList.remove("dragging");
-          currentDragElement = null;
-        });
-      });
-
-      itemContainer.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        const dragging = currentDragElement;
-        const target = e.target.closest(".input-group");
-        if (!dragging || !target || dragging === target || !dragging.classList.contains("input-group")) return;
-
-        const rect = target.getBoundingClientRect();
-        const after = (e.clientY - rect.top) > rect.height / 2;
-        itemContainer.insertBefore(dragging, after ? target.nextSibling : target);
-      });
-    });
-  }*/
-
+ 
   function initializeDragAndDrop() {
     // SECTION-LEVEL drag and drop
     document.querySelectorAll(".section-container").forEach(container => {
@@ -744,6 +561,7 @@
   function addCommas(x) {
     return x.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
   }
+
   // Event listener to format price inputs with commas as the user types
   function attachCommaFormatting(input) {
     input.addEventListener("input", (e) => {
@@ -759,10 +577,12 @@
       input.setSelectionRange(newPosition, newPosition);
     });
   }
+
   // Helper function to remove commas from a number string
   function removeCommas(value) {
     return value.replace(/,/g, "");
   }
+
   /** ==========================
    * Utility Function: Prepare Form Data
    ========================== **/
@@ -875,8 +695,6 @@
   showTab(currentTab); // Display the current tab
 
   function updateNextBtnState() {
-    /*console.log("updateNextBtnState – currentTab:", currentTab,
-              "imgpath:", document.getElementById("imgpath").value);*/
     // Only care when we're on tab 0 (Step 1)
     if (currentTab !== 0) return;
 
@@ -1131,48 +949,7 @@
     fields.forEach(field => {field.disabled = !isEnabled;});
   });
 
-  /*document.getElementById('img-category').addEventListener('change', async (event) => {
-    const category = event.target.value;
-    try {
-      await loadThumbnailsForCategory(category);
-    } catch (err) {
-      console.error("function failed: ", err);
-    }
-  });*/
-
-  /*async function loadThumbnailsForCategory(category) {
-    const container = document.getElementById('thumbnail-container');
-    container.innerHTML = ''; // clear previous
-
-    // reset <section>
-    document.getElementById("imgpath").value = "";
-    updateNextBtnState();
-
-    try {
-      const res = await fetch(`/api/images?category=${category}`);
-      const images = await res.json();
-
-      images.forEach(({thumb, full}) => {
-        const img = document.createElement('img');
-        img.src = thumb;
-        img.alt = full;
-        img.className = 'thumbnail';
-        img.style.cursor = 'pointer';
-        img.addEventListener('click', () => {
-          document.getElementById('imgpath').value = full;
-          container.querySelectorAll('img').forEach(i => i.classList.remove('selected'));
-          img.classList.add('selected');
-          updateNextBtnState();
-        });
-
-        container.appendChild(img);
-      });
-    } catch (err) {
-      console.error("Error loading thumbnails:", err);
-    }
-  }*/
-
-    // ─────────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────────
   // 4) Given allThumbnails[], split into chunks of four and
   //    generate a <div class="carousel-item"> … </div> for each chunk.
   //    Append those items into #carousel-inner.
@@ -1249,56 +1026,6 @@
     }
   }
 
-  /**
-  * scrollToImage:
-  *   1) Find the index of fullPath within allThumbnails[]
-  *   2) Compute its slide as Math.floor(idx/4)
-  *   3) Tell Bootstrap’s carousel to go to that slide
-  *   4) Once the slide transition completes, add `.selected` to that <img>
-  */
-  /*function scrollToImage(fullPath) {
-    // 1) Find the position in allThumbnails
-    const idx = allThumbnails.findIndex(obj => obj.full === fullPath);
-    if (idx === -1) {
-      // not found—nothing to do
-      return;
-    }
-
-    // 2) Compute which slide (0-based) holds this thumbnail
-    const slideIndex = Math.floor(idx / 4);
-
-    // 3) Grab the carousel element & ensure there's a Carousel instance
-    const carouselEl = document.getElementById('thumbnail-carousel');
-    let carouselInstance = bootstrap.Carousel.getInstance(carouselEl);
-    if (!carouselInstance) {
-      // If none exists yet, create one (disable auto‐cycling)
-      carouselInstance = new bootstrap.Carousel(carouselEl, { interval: false });
-    }
-
-    // 4) Move to that slideIndex
-    carouselInstance.to(slideIndex);
-
-    // 5) After the slide finishes transitioning, apply `.selected`
-    //    We listen for the 'slid.bs.carousel' event just once
-    carouselEl.addEventListener('slid.bs.carousel', function handler() {
-      carouselEl.removeEventListener('slid.bs.carousel', handler);
-
-      // Remove `.selected` from any previously highlighted <img>
-      carouselEl.querySelectorAll('img.thumbnail').forEach(img => {
-        img.classList.remove('selected');
-      });
-
-      // Find the exact <img> with alt===fullPath, add .selected
-      const allImgs = carouselEl.querySelectorAll('img.thumbnail');
-      for (const img of allImgs) {
-        if (img.alt === fullPath) {
-          img.classList.add('selected');
-          break;
-        }
-      }
-    });
-  }*/
-
   function scrollToImage(fullPath) {
     // 1) Find the index of fullPath in allThumbnails[]
     const idx = allThumbnails.findIndex(obj => obj.full === fullPath);
@@ -1374,12 +1101,6 @@
     updateNextBtnState();
 
     try {
-      // If you have a single endpoint that returns absolutely all images (no filtering by category),
-      // you could do:
-      //   const res = await fetch('/api/images');
-      //   allThumbnails = await res.json();
-      //   return buildCarousel();
-
       // Otherwise, loop categories one by one:
       for (const category of ALL_IMAGE_CATEGORIES) {
         const res = await fetch(`/api/images?category=${category}`);
@@ -1435,8 +1156,6 @@
 
   // Updates ZIP based on selected city
   function updateZipFromCity(state, city, zipSelect) {
-    //const zipList = stateCityZipData[state]?.cities[city] || [];
-    //zipInput.value = zipList.length > 0 ? String(zipList[0]).padStart(5, "0") : "";
     const zipList = stateCityZipData[state]?.cities[city] || [];
     zipSelect.innerHTML = "";
 
@@ -1462,27 +1181,10 @@
     //const defaultCategory = "business";
 
     //document.getElementById("img-category").value = defaultCategory;
-    //loadThumbnailsForCategory(defaultCategory);
+
     // Add default "Freight" section
     addInvestSection("Freight", ["SHIPPER PREPAYS FREIGHT – ADDS TO CUSTOMER INVOICE", "Due to volatility in freight charges, the shipping cost provided on this quote is an ESTIMATE only. Freight costs and the number of truckloads may change. The actual freight cost will be charged at the time of shipment OR on the final invoice."], ""); // Predefined items and empty price
-    /*const textareas = document.querySelectorAll("textarea");
-
-    const resizeTextarea = (textarea) => {
-      // Reset height to auto to recalculate
-      textarea.style.height = "auto";
-
-      // Set height to scrollHeight
-      textarea.style.height = `${textarea.scrollHeight}px`;
-    };
-
-    textareas.forEach((textarea) => {
-      // Attach input event to dynamically resize on text changes
-      textarea.addEventListener("input", () => resizeTextarea(textarea));
-
-      // Resize on page load to fit pre-filled content
-      resizeTextarea(textarea);
-    });*/
-
+    
     showTab(currentTab); // Ensure first tab is visible
     initStateCityZipForm();
     initializeDragAndDrop();
