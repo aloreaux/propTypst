@@ -212,7 +212,9 @@
 
       if (itemDiv) {
         itemDiv.querySelector('textarea[name="investItem"]').textContent = text;
+        //itemDiv.querySelector('input[name="investItem"]').value = text;
         itemsContainer.appendChild(itemDiv);
+        initializeDragAndDrop();
       }
     });
 
@@ -597,83 +599,144 @@
     });
   }*/
 
-  function initializeDragAndDrop() {
-    const sectionContainers = document.querySelectorAll(".section-container");
+  let currentDragElement = null;
 
-    sectionContainers.forEach(container => {
-      const sections = container.querySelectorAll(".nested-section");
-
-      sections.forEach(section => {
-        // Make section draggable
-        //section.setAttribute("draggable", true);
+  /*function initializeDragAndDrop() {
+    // Sections (invest-section, equip-room)
+    document.querySelectorAll(".section-container").forEach(container => {
+      container.querySelectorAll(".nested-section").forEach(section => {
+        section.setAttribute("draggable", true);
 
         section.addEventListener("dragstart", (e) => {
           currentDragElement = section;
-          section.style.opacity = "0.5";
+          e.dataTransfer.setData("text/plain", "section");
+          e.dataTransfer.effectAllowed = "move";
+          section.classList.add("dragging");
         });
 
         section.addEventListener("dragend", () => {
-          section.style.opacity = "1";
+          section.classList.remove("dragging");
           currentDragElement = null;
         });
       });
 
-      // SECTION CONTAINER DROP TARGET
       container.addEventListener("dragover", (e) => {
         e.preventDefault();
-        console.log("CONTAINER DRAG ELEMENT: ", currentDragElement);
-
+        const dragging = currentDragElement;
         const target = e.target.closest(".nested-section");
-        if (!target || target === currentDragElement) return;
+        if (!dragging || !target || dragging === target || !dragging.classList.contains("nested-section")) return;
 
-        const targetRect = target.getBoundingClientRect();
-        const offset = e.clientY - targetRect.top;
-
-        if (offset > targetRect.height / 2) {
-          container.insertBefore(currentDragElement, target.nextSibling);
-        } else {
-          container.insertBefore(currentDragElement, target);
-        }
+        const rect = target.getBoundingClientRect();
+        const after = (e.clientY - rect.top) > rect.height / 2;
+        container.insertBefore(dragging, after ? target.nextSibling : target);
       });
     });
 
-    // ITEM-LEVEL drag/drop
+    // Items (input-group inside *-items)
     document.querySelectorAll(".nested-section").forEach(section => {
       const itemContainer = section.querySelector("[class$='-items']");
       if (!itemContainer) return;
 
-      const items = itemContainer.querySelectorAll(".input-group");
-
-      items.forEach(item => {
-        //item.setAttribute("draggable", true);
+      itemContainer.querySelectorAll(".input-group").forEach(item => {
+        item.setAttribute("draggable", true);
 
         item.addEventListener("dragstart", (e) => {
-          e.stopPropagation(); // prevent bubbling up to section drag
+          e.stopPropagation(); // prevent bubbling to section
           currentDragElement = item;
-          item.style.opacity = "0.5";
+          e.dataTransfer.setData("text/plain", "item");
+          e.dataTransfer.effectAllowed = "move";
+          item.classList.add("dragging");
         });
 
         item.addEventListener("dragend", () => {
-          item.style.opacity = "1";
+          item.classList.remove("dragging");
           currentDragElement = null;
         });
       });
 
-      // ITEM CONTAINER DROP TARGET
       itemContainer.addEventListener("dragover", (e) => {
         e.preventDefault();
-        console.log("ITEM-LEVEL DRAG ELEMENT: ", currentDragElement);
+        const dragging = currentDragElement;
         const target = e.target.closest(".input-group");
-        if (!target || target === currentDragElement) return;
+        if (!dragging || !target || dragging === target || !dragging.classList.contains("input-group")) return;
 
-        const targetRect = target.getBoundingClientRect();
-        const offset = e.clientY - targetRect.top;
+        const rect = target.getBoundingClientRect();
+        const after = (e.clientY - rect.top) > rect.height / 2;
+        itemContainer.insertBefore(dragging, after ? target.nextSibling : target);
+      });
+    });
+  }*/
 
-        if (offset > targetRect.height / 2) {
-          itemContainer.insertBefore(currentDragElement, target.nextSibling);
-        } else {
-          itemContainer.insertBefore(currentDragElement, target);
-        }
+  function initializeDragAndDrop() {
+    // SECTION-LEVEL drag and drop
+    document.querySelectorAll(".section-container").forEach(container => {
+      container.querySelectorAll(".nested-section").forEach(section => {
+        section.setAttribute("draggable", true);
+
+        section.addEventListener("dragstart", (e) => {
+          // Don't allow drag if starting inside an input-group (item)
+          if (e.target.closest(".input-group")) {
+            e.preventDefault();
+            return;
+          }
+
+          currentDragElement = section;
+          e.dataTransfer.setData("text/plain", "section");
+          e.dataTransfer.effectAllowed = "move";
+          section.classList.add("dragging");
+        });
+
+        section.addEventListener("dragend", () => {
+          section.classList.remove("dragging");
+          currentDragElement = null;
+        });
+      });
+
+      container.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        const dragging = currentDragElement;
+        const target = e.target.closest(".nested-section");
+
+        if (!dragging || !target || dragging === target || !dragging.classList.contains("nested-section")) return;
+
+        const rect = target.getBoundingClientRect();
+        const after = (e.clientY - rect.top) > rect.height / 2;
+        container.insertBefore(dragging, after ? target.nextSibling : target);
+      });
+    });
+
+    // ITEM-LEVEL drag and drop
+    document.querySelectorAll(".nested-section").forEach(section => {
+      const itemContainer = section.querySelector("[class$='-items']");
+      if (!itemContainer) return;
+
+      itemContainer.querySelectorAll(".input-group").forEach(item => {
+        item.setAttribute("draggable", true);
+
+        item.addEventListener("dragstart", (e) => {
+          e.stopPropagation(); // prevent bubbling to section
+          currentDragElement = item;
+          e.dataTransfer.setData("text/plain", "item");
+          e.dataTransfer.effectAllowed = "move";
+          item.classList.add("dragging");
+        });
+
+        item.addEventListener("dragend", () => {
+          item.classList.remove("dragging");
+          currentDragElement = null;
+        });
+      });
+
+      itemContainer.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        const dragging = currentDragElement;
+        const target = e.target.closest(".input-group");
+
+        if (!dragging || !target || dragging === target || !dragging.classList.contains("input-group")) return;
+
+        const rect = target.getBoundingClientRect();
+        const after = (e.clientY - rect.top) > rect.height / 2;
+        itemContainer.insertBefore(dragging, after ? target.nextSibling : target);
       });
     });
   }
@@ -1187,13 +1250,13 @@
   }
 
   /**
- * scrollToImage:
- *   1) Find the index of fullPath within allThumbnails[]
- *   2) Compute its slide as Math.floor(idx/4)
- *   3) Tell Bootstrap’s carousel to go to that slide
- *   4) Once the slide transition completes, add `.selected` to that <img>
- */
-  function scrollToImage(fullPath) {
+  * scrollToImage:
+  *   1) Find the index of fullPath within allThumbnails[]
+  *   2) Compute its slide as Math.floor(idx/4)
+  *   3) Tell Bootstrap’s carousel to go to that slide
+  *   4) Once the slide transition completes, add `.selected` to that <img>
+  */
+  /*function scrollToImage(fullPath) {
     // 1) Find the position in allThumbnails
     const idx = allThumbnails.findIndex(obj => obj.full === fullPath);
     if (idx === -1) {
@@ -1234,6 +1297,49 @@
         }
       }
     });
+  }*/
+
+  function scrollToImage(fullPath) {
+    // 1) Find the index of fullPath in allThumbnails[]
+    const idx = allThumbnails.findIndex(obj => obj.full === fullPath);
+    if (idx === -1) return; // nothing to do
+
+    // 2) Compute which slide (0-based) holds this thumbnail
+    const slideIndex = Math.floor(idx / 4);
+
+    // 3) Get or create the Bootstrap Carousel instance
+    const carouselEl = document.getElementById('thumbnail-carousel');
+    let carouselInstance = bootstrap.Carousel.getInstance(carouselEl);
+    if (!carouselInstance) {
+      carouselInstance = new bootstrap.Carousel(carouselEl, { interval: false, wrap: true });
+    }
+
+    // Helper: highlight the correct <img> and clear others
+    const applySelection = () => {
+      carouselEl.querySelectorAll('img.thumbnail').forEach(img => {
+        img.classList.remove('selected');
+      });
+      const target = carouselEl.querySelector(`img.thumbnail[alt="${fullPath}"]`);
+      if (target) target.classList.add('selected');
+      updateNextBtnState(); // if you need to re-enable Next/Prev buttons
+    };
+
+    // 4) Determine the current active slide index
+    const items = Array.from(carouselEl.querySelectorAll('.carousel-item'));
+    const currentIndex = items.findIndex(item => item.classList.contains('active'));
+
+    if (currentIndex === slideIndex) {
+      // Already on the right slide → just highlight
+      applySelection();
+    } else {
+      // Not on the right slide → wait for it to finish sliding, then highlight
+      const onSlid = () => {
+        carouselEl.removeEventListener('slid.bs.carousel', onSlid);
+        applySelection();
+      };
+      carouselEl.addEventListener('slid.bs.carousel', onSlid);
+      carouselInstance.to(slideIndex);
+    }
   }
 
   async function initStateCityZipForm() {
@@ -1359,7 +1465,7 @@
     //loadThumbnailsForCategory(defaultCategory);
     // Add default "Freight" section
     addInvestSection("Freight", ["SHIPPER PREPAYS FREIGHT – ADDS TO CUSTOMER INVOICE", "Due to volatility in freight charges, the shipping cost provided on this quote is an ESTIMATE only. Freight costs and the number of truckloads may change. The actual freight cost will be charged at the time of shipment OR on the final invoice."], ""); // Predefined items and empty price
-    const textareas = document.querySelectorAll("textarea");
+    /*const textareas = document.querySelectorAll("textarea");
 
     const resizeTextarea = (textarea) => {
       // Reset height to auto to recalculate
@@ -1375,7 +1481,7 @@
 
       // Resize on page load to fit pre-filled content
       resizeTextarea(textarea);
-    });
+    });*/
 
     showTab(currentTab); // Ensure first tab is visible
     initStateCityZipForm();
