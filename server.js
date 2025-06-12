@@ -39,6 +39,7 @@ app.get("/", (req, res) => {
 });
 
 app.post("/generate-pdf", async (req, res) => {
+  const d = new Date();
   const sessionId = uuidv4(); // Use `userId` from the form or create a new one
   const filledTemplatePath = getSessionFilePath(sessionId, "filled", "typ");
   const outputPdfPath = getSessionFilePath(sessionId, "output", "pdf");
@@ -92,7 +93,7 @@ app.post("/generate-pdf", async (req, res) => {
 
   docForm.proposal = req.body.proposal;
 
-  console.log("Processed Data:", JSON.stringify(docForm, null, 2));
+  console.log("[" + d.toISOString() + "] " + "Processed Data:", JSON.stringify(docForm, null, 2));
 
   try {
     // Load and process the Typst template
