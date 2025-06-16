@@ -39,6 +39,7 @@ app.get("/", (req, res) => {
 });
 
 app.post("/generate-pdf", async (req, res) => {
+  const d = new Date();
   const sessionId = uuidv4(); // Use `userId` from the form or create a new one
   const filledTemplatePath = getSessionFilePath(sessionId, "filled", "typ");
   const outputPdfPath = getSessionFilePath(sessionId, "output", "pdf");
@@ -59,7 +60,8 @@ app.post("/generate-pdf", async (req, res) => {
   docForm.ny = !!docForm.ny;
 
   const match = docForm.imgpath.match(/assets\/([^/]+)\//);
-  const category = match ? match[1] : 'default';
+  //const category = match ? match[1] : 'default';
+  const category = req.body['img-category'];
 
   // Handle image paths
   docForm.cornerimg = `assets/${category}/${category}.svg`;
@@ -91,7 +93,7 @@ app.post("/generate-pdf", async (req, res) => {
 
   docForm.proposal = req.body.proposal;
 
-  console.log("Processed Data:", JSON.stringify(docForm, null, 2));
+  console.log("[" + d.toISOString() + "] " + "Processed Data:", JSON.stringify(docForm, null, 2));
 
   try {
     // Load and process the Typst template
@@ -101,6 +103,9 @@ app.post("/generate-pdf", async (req, res) => {
     // Replace the placeholder with dynamic data
     for (const [key, value] of Object.entries(docForm)) {
       const placeholder = "$" + key + "$";
+
+      const allowRaw = ["summary", "equip", "invest"].includes(key) || key.match(/Text$/);
+
       if (typeof value === "boolean") {
         template = template.replace(placeholder, value);
       } else if (typeof value === "string") {
@@ -110,7 +115,11 @@ app.post("/generate-pdf", async (req, res) => {
             removeOuterQuotesIfWrapped(value),
           );
         } else {
-          template = template.replace(placeholder, '"' + value + '"');
+          //template = template.replace(placeholder, '"' + value + '"');
+          template = template.replace(
+            placeholder,
+            allowRaw ? value: `"${value}"`
+          );
         }
       } else {
         template = template.replace(placeholder, value);

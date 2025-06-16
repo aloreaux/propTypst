@@ -1,0 +1,55 @@
+<template id="tmpl-equip-room">
+  <div class="card nested-section equip-room mb-2" draggable="true">
+    <div class="col-md p-2">
+      <div class="input-group">
+        <span class="input-group-text">Room Name</span>
+        <input type="text" name="equipRoomName" placeholder="Room Name" class="form-control" required />
+        <button type="button" class="btn btn-primary" onclick="addEquipItem(this)">Add Item</button>
+        <button type="button" class="btn btn-danger" onclick="this.closest('.equip-room').remove()">Remove Room</button>
+      </div>
+      <div class="equip-items"></div>
+    </div>
+  </div>
+</template>
+
+<template id="tmpl-equip-item">
+  <div class="input-group mt-2" draggable="true">
+    <span class="input-group-text">Item</span>
+    <input type="text" name="equipItem" class="form-control" required />
+    <button type="button" class="btn btn-danger" onclick="this.parentNode.remove()"><i class="bi bi-x-square-fill"></i></button>
+  </div>
+</template>
+
+<template id="tmpl-invest-section">
+  <div class="card nested-section invest-section mb-2" draggable="true">
+    <div class="row p-2">
+      <div class="col-md-6">
+        <div class="input-group">
+          <span class="input-group-text">Section Name</span>
+          <input type="text" name="investSectionName" value="${name}" class="form-control" required />
+          <button type="button" class="btn btn-primary" onclick="addInvestItem(this)">Add Item</button>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="input-group">
+          <span class="input-group-text">Price</span><input type="text" name="investPrice" value="${price}" class="form-control" /></label>
+          <button type="button" class="btn btn-danger" onclick="this.closest('.invest-section').remove()">Remove Section</button>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <div class="invest-items"></div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template id="tmpl-invest-item">
+  <div class="input-group px-2 pb-2" draggable="true">
+    <span class="input-group-text">Item</span>
+    <textarea class="form-control" rows="1" name="investItem" required></textarea>
+    <!--<input type="text" name="investItem" class="form-control" required />-->
+    <button type="button" class="btn btn-danger" onclick="this.parentNode.remove()"><i class="bi bi-x-square-fill"></i></button>
+  </div>
+</template>

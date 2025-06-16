@@ -9,7 +9,7 @@
     linebreak()
     for item in items {
       list(indent: 1em)[
-        #item
+        #eval(item, mode: "markup")
       ]
     }
   }

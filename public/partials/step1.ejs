@@ -16,7 +16,38 @@
     </select> 
 
     <input type="hidden" name="imgpath" id="imgpath" />
-    <div id="thumbnail-container" class="d-flex flex-wrap gap-2 mt-3"></div>
+    <!-- Carousel wrapper -->
+    <div
+      id="thumbnail-carousel"
+      class="carousel slide"
+      data-bs-ride="false"
+      style="margin-top: 1rem;"
+    >
+      <div class="carousel-inner" id="carousel-inner">
+        <!-- JavaScript will inject <div class="carousel-item"> here -->
+      </div>
+
+      <!-- Previous control -->
+      <button
+        class="carousel-control-prev"
+        type="button" data-bs-target="#thumbnail-carousel"
+        data-bs-slide="prev"
+      >
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+      </button>
+
+      <!-- Next control -->
+      <button
+        class="carousel-control-next"
+        type="button"
+        data-bs-target="#thumbnail-carousel"
+        data-bs-slide="next"
+      >
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+      </button>
+    </div>
   </div>
 
   <div class="col-md-6 px-5">
