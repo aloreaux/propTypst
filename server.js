@@ -103,6 +103,9 @@ app.post("/generate-pdf", async (req, res) => {
     // Replace the placeholder with dynamic data
     for (const [key, value] of Object.entries(docForm)) {
       const placeholder = "$" + key + "$";
+
+      const allowRaw = ["summary", "equip", "invest"].includes(key) || key.match(/Text$/);
+
       if (typeof value === "boolean") {
         template = template.replace(placeholder, value);
       } else if (typeof value === "string") {
@@ -112,7 +115,11 @@ app.post("/generate-pdf", async (req, res) => {
             removeOuterQuotesIfWrapped(value),
           );
         } else {
-          template = template.replace(placeholder, '"' + value + '"');
+          //template = template.replace(placeholder, '"' + value + '"');
+          template = template.replace(
+            placeholder,
+            allowRaw ? value: `"${value}"`
+          );
         }
       } else {
         template = template.replace(placeholder, value);
