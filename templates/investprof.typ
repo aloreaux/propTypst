@@ -63,7 +63,7 @@
     ..for (section, data) in invest-state.get() {
       ([*#section*
       #for item in data.at("items") {
-        text(size: 12pt)[#list(indent: 1em, item)]
+        text(size: 12pt)[#list(indent: 1em, eval(item, mode: "markup"))]
       }], table.hline(),
       if (lumpSumBool.get()) {
         []

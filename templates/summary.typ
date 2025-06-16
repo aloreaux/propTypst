@@ -18,11 +18,11 @@
       v(1em)
       if type(items) == array {
           for item in items {
-              list(indent: 1em, item)
+              list(indent: 1em, eval(item, mode: "markup"))
           }
       } else {
           h(1.5em)
-          items
+          eval(items, mode: "markup")
           v(1em)
       }
   }
