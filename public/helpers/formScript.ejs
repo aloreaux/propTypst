@@ -6,6 +6,7 @@
 
   const jsonBtn = document.getElementById("generate-json");
   const pdfBtn = document.getElementById("generate-pdf");
+  const loadJSONbtn = document.getElementById("load-json");
   let cacheProposalId = null;
 
   const investmentContainer = document.getElementById("investment-container");
@@ -103,7 +104,7 @@
     summaryDiv.className = 'nested-section summary-section';
     summaryDiv.innerHTML = `
             <div class="col-md-6">
-            <label class="form-label">Summary Name: <input type="text" name="summarySectionName" placeholder="Summary Name" class="form-control" required /></label>
+              <label class="form-label">Summary Name: <input type="text" name="summarySectionName" placeholder="Summary Name" class="form-control" required /></label>
             <div class="summary-items"></div>
             <button type="button" class="btn btn-primary btn-sm me-2" onclick="addSummaryItem(this)">Add Item</button>
             <button type="button" class="btn btn-danger btn-sm" onclick="this.parentNode.remove()">Remove Room</button>
@@ -116,7 +117,7 @@
     const container = button.previousElementSibling;
     const itemDiv = document.createElement('div');
     itemDiv.innerHTML = `
-        <label class="form-label">Item: <input type="text" name="summaryItem" size="175" class="form-control" required /></label>
+        <label class="form-label">Item:<input type="text" name="summaryItem" size="175" class="form-control" required /></label>
         <button type="button" class="btn btn-danger btn-sm" onclick="this.parentNode.remove()">Remove Item</button>
       `;
     container.appendChild(itemDiv);
@@ -281,30 +282,33 @@
     });
   }
 
-  document.getElementById("load-json").addEventListener("click", async () => {
-    const fileInput = document.createElement("input");
-    fileInput.type = "file";
-    fileInput.accept = "application/json";
+  if(loadJSONbtn) {
+    //document.getElementById("load-json").addEventListener("click", async () => {
+    loadJSONbtn.addEventListener("click", async () => {
+      const fileInput = document.createElement("input");
+      fileInput.type = "file";
+      fileInput.accept = "application/json";
 
-    fileInput.addEventListener("change", async (event) => {
-      const file = event.target.files[0];
-      if (!file) return;
+      fileInput.addEventListener("change", async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
 
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const jsonData = JSON.parse(e.target.result);
-          populateForm(jsonData);
-        } catch (error) {
-          console.error("Invalid JSON file", error);
-          alert("Failed to load JSON file. Please check its structure.");
-        }
-      };
-      reader.readAsText(file);
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const jsonData = JSON.parse(e.target.result);
+            populateForm(jsonData);
+          } catch (error) {
+            console.error("Invalid JSON file", error);
+            alert("Failed to load JSON file. Please check its structure.");
+          }
+        };
+        reader.readAsText(file);
+      });
+
+      fileInput.click();
     });
-
-    fileInput.click();
-  });
+  }
 
   // Populate form with data
   async function populateForm(data) {
@@ -383,7 +387,72 @@
         `;
     }
 
-    /** ✅ Handle Summary Sections **/
+    // ✅ Handle Summary Sections
+    const summarySections = document.querySelectorAll(".summary-section");
+    console.log(`🔹 Found ${summarySections.length} summary sections.`);
+
+    const savedSummary = data.summary || {};
+
+    summarySections.forEach((section, index) => {
+      const titleInput = section.querySelector("input.section-title");
+      const summaryItemsContainer = section.querySelector(".summary-items");
+      const disableBtn = section.querySelector(".disable-btn");
+
+      if (!titleInput || !summaryItemsContainer) {
+        console.warn(`⚠️ Missing elements in summary section ${index + 1}`);
+        return;
+      }
+
+      const defaultTitle = titleInput.dataset.originalTitle || titleInput.value.trim();
+      titleInput.disabled = false; // ✅ Allow editing again
+
+      let matchedKey = Object.keys(savedSummary).find(
+        key => key.toLowerCase() === defaultTitle.toLowerCase()
+      );
+
+      if (!matchedKey) {
+        console.log(`❌ No summary match for '${defaultTitle}'. Disabling section.`);
+        titleInput.value = defaultTitle;
+        //titleInput.disabled = true;
+        summaryItemsContainer.innerHTML = "";
+        if (disableBtn) disableBtn.classList.add("disabled");
+        return;
+      }
+
+      console.log(`✅ Matched summary key: ${matchedKey}`);
+      const content = savedSummary[matchedKey];
+
+      titleInput.value = matchedKey;
+      summaryItemsContainer.innerHTML = "";
+
+      if (Array.isArray(content)) {
+        content.forEach((item) => {
+          const fieldDiv = document.createElement("div");
+          fieldDiv.className = "input-group mb-2";
+          fieldDiv.innerHTML = `
+            <span class="input-group-text">Item</span>
+            <input type="text" class="form-control summary-input" name="${matchedKey}Text" value="${item}" required />
+            <button class="btn btn-danger" type="button" onclick="this.parentNode.remove()">
+              <i class="bi bi-x-square-fill"></i>
+            </button>
+          `;
+          summaryItemsContainer.appendChild(fieldDiv);
+        });
+      } else if (typeof content === "string") {
+        const fieldDiv = document.createElement("div");
+        fieldDiv.className = "input-group mb-2";
+        fieldDiv.innerHTML = `
+          <textarea class="form-control summary-textarea" name="${matchedKey}Area" rows="3" required>${content}</textarea>
+        `;
+        summaryItemsContainer.appendChild(fieldDiv);
+        const addButton = section.querySelector(".add-item-btn");
+        if (addButton) addButton.disabled = true;
+      }
+
+      if (disableBtn) disableBtn.classList.remove("disabled");
+    });
+
+    /* ✅ Handle Summary Sections
     const summarySections = document.querySelectorAll(".summary-section");
     console.log(`🔹 Found ${summarySections.length} summary sections.`); // Debug log
 
@@ -447,7 +516,7 @@
         const addButton = section.querySelector(".add-item-btn");
         if (addButton) addButton.disabled = true; // Disable "Add Item" button
       }
-    });
+    });*/
 
     // Handle investment sections (dynamically create missing sections and items)
     if (data.invest) {
@@ -851,7 +920,7 @@
 
 
     const fieldDiv = document.createElement("div");
-    fieldDiv.className = "input-group mb-3";
+    fieldDiv.className = "input-group mb-2";
 
     if (isPar) {
       // Ensure only one textarea is allowed
@@ -861,6 +930,7 @@
       addButton.disabled = true;
     } else {
       fieldDiv.innerHTML = `
+      <span class="input-group-text">Item</span>
       <input type="text" class="form-control summary-input" name="${section.toLowerCase()}Text" required />
     `;
       addButton.disabled = false;
