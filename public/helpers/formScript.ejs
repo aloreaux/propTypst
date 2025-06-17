@@ -631,6 +631,11 @@
     const summarySections = document.querySelectorAll(".summary-section");
 
     summarySections.forEach((section) => {
+      //console.log("Section style: ", section.style.display);
+      //if (section.style.display === "none") return;
+      const isDisabled = section.querySelector(".summary-items input, .summary-items textarea")?.disabled;
+      if (isDisabled) return; // 🔁 Skip entire section if inputs are disabled
+
       const summaryName = section.querySelector("input.section-title")?.value.trim(); // ✅ Get section name
       if (!summaryName) return; // Skip if empty
 
@@ -890,6 +895,7 @@
       if (!el.classList.contains("section-title") && !el.classList.contains("dropdown-toggle")) {
         el.disabled = !isEnabled;
       }
+      //el.disabled = !isEnabled;
     });
 
     // Ensure "Add Item" button is properly disabled when the section is disabled
@@ -899,7 +905,7 @@
 
     // Ensure title remains disabled
     if (titleInput) {
-      titleInput.disabled = true;
+      titleInput.disabled = !isEnabled;
     }
 
     // Update dropdown items visibility
