@@ -308,49 +308,37 @@
 
       fileInput.click();
     });
-  } 
+  }
 
   function populateSummarySections(summaryData = {}) {
-    const allSections = document.querySelectorAll(".summary-section");
+    const sectionEls = [...document.querySelectorAll(".summary-section")];
+    const summaryKeys = Object.keys(summaryData);
   
-    allSections.forEach(section => {
-      const sectionKey = section.getAttribute("data-section"); // ✅ Correct use of data-section
-      const titleInput = section.querySelector(".section-title");
+    sectionEls.forEach((sectionEl, idx) => {
+      const titleInput = sectionEl.querySelector(".section-title");
+      const defaultTitle = titleInput?.dataset?.originalTitle;
+      const container = sectionEl.querySelector(".summary-items");
+      const key = summaryKeys[idx]; // Match section by order
   
-      // Restore default title and enable it
-      titleInput.value = sectionKey;
+      // Reset section title and container
       titleInput.disabled = false;
-  
-      const container = section.querySelector(".summary-items");
+      titleInput.value = key || defaultTitle || "";
       container.innerHTML = `
         <div class="input-group mb-2">
           <span class="input-group-text">Item</span>
-          <input type="text" class="form-control summary-input" name="${sectionKey}Text" required />
-          <textarea class="form-control summary-textarea" name="${sectionKey}Area" rows="3" style="display: none;" disabled></textarea>
+          <input type="text" class="form-control summary-input" name="${defaultTitle}Text" required />
+          <textarea class="form-control summary-textarea" name="${defaultTitle}Area" rows="3" style="display: none;" disabled></textarea>
         </div>
       `;
   
-      // Disable the section by default
-      section.classList.add("disabled-section");
-      section.querySelectorAll("input, textarea, button").forEach(el => {
-        if (!el.classList.contains("section-title")) el.disabled = true;
-      });
-    });
+      if (!key || !(key in summaryData)) {
+        toggleSection(sectionEl.dataset.section, false);
+        return;
+      }
   
-    // Enable and populate sections from summaryData
-    Object.entries(summaryData).forEach(([key, value]) => {
-      const section = [...document.querySelectorAll(".summary-section")].find(sec => {
-        return sec.getAttribute("data-section")?.toLowerCase() === key.toLowerCase();
-      });
-  
-      if (!section) return;
-  
-      const titleInput = section.querySelector(".section-title");
-      titleInput.value = key;
-      titleInput.disabled = false;
-  
-      const itemsContainer = section.querySelector(".summary-items");
-      itemsContainer.innerHTML = "";
+      // Populate values
+      const value = summaryData[key];
+      container.innerHTML = ""; // Clear again
   
       if (typeof value === "string") {
         const textarea = document.createElement("textarea");
@@ -359,7 +347,7 @@
         textarea.rows = 3;
         textarea.required = true;
         textarea.value = value;
-        itemsContainer.appendChild(textarea);
+        container.appendChild(textarea);
       } else if (Array.isArray(value)) {
         value.forEach(item => {
           const div = document.createElement("div");
@@ -371,23 +359,15 @@
               <i class="bi bi-x-square-fill"></i>
             </button>
           `;
-          itemsContainer.appendChild(div);
+          container.appendChild(div);
         });
       }
   
-      // Enable section
-      section.classList.remove("disabled-section");
-      section.querySelectorAll("input, textarea, button").forEach(el => {
-        el.disabled = false;
-      });
+      // Enable this section
+      sectionEl.classList.remove("disabled-section");
+      sectionEl.querySelectorAll("input, textarea, button").forEach(el => el.disabled = false);
+      sectionEl.dataset.enabled = true;
     });
-    document.querySelectorAll(".summary-section").forEach(section => {
-    const sectionKey = section.getAttribute("data-section");
-      if (!Object.keys(summaryData).some(k => k.toLowerCase() === sectionKey.toLowerCase())) {
-        console.log(`🔻 Disabling unused section: ${sectionKey}`);
-        toggleSection(sectionKey, false);
-      }
-    })  ;
   }
 
   // Populate form with data
