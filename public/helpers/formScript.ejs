@@ -308,6 +308,86 @@
 
       fileInput.click();
     });
+  } 
+
+  function populateSummarySections(summaryData = {}) {
+    const allSections = document.querySelectorAll(".summary-section");
+  
+    allSections.forEach(section => {
+      const sectionKey = section.getAttribute("data-section"); // ✅ Correct use of data-section
+      const titleInput = section.querySelector(".section-title");
+  
+      // Restore default title and enable it
+      titleInput.value = sectionKey;
+      titleInput.disabled = false;
+  
+      const container = section.querySelector(".summary-items");
+      container.innerHTML = `
+        <div class="input-group mb-2">
+          <span class="input-group-text">Item</span>
+          <input type="text" class="form-control summary-input" name="${sectionKey}Text" required />
+          <textarea class="form-control summary-textarea" name="${sectionKey}Area" rows="3" style="display: none;" disabled></textarea>
+        </div>
+      `;
+  
+      // Disable the section by default
+      section.classList.add("disabled-section");
+      section.querySelectorAll("input, textarea, button").forEach(el => {
+        if (!el.classList.contains("section-title")) el.disabled = true;
+      });
+    });
+  
+    // Enable and populate sections from summaryData
+    Object.entries(summaryData).forEach(([key, value]) => {
+      const section = [...document.querySelectorAll(".summary-section")].find(sec => {
+        return sec.getAttribute("data-section")?.toLowerCase() === key.toLowerCase();
+      });
+  
+      if (!section) return;
+  
+      const titleInput = section.querySelector(".section-title");
+      titleInput.value = key;
+      titleInput.disabled = false;
+  
+      const itemsContainer = section.querySelector(".summary-items");
+      itemsContainer.innerHTML = "";
+  
+      if (typeof value === "string") {
+        const textarea = document.createElement("textarea");
+        textarea.className = "form-control summary-textarea";
+        textarea.name = `${key}Area`;
+        textarea.rows = 3;
+        textarea.required = true;
+        textarea.value = value;
+        itemsContainer.appendChild(textarea);
+      } else if (Array.isArray(value)) {
+        value.forEach(item => {
+          const div = document.createElement("div");
+          div.className = "input-group mb-2";
+          div.innerHTML = `
+            <span class="input-group-text">Item</span>
+            <input type="text" class="form-control summary-input" name="${key}Text" value="${item}" required />
+            <button class="btn btn-danger btn-sm" type="button" onclick="this.parentNode.remove()">
+              <i class="bi bi-x-square-fill"></i>
+            </button>
+          `;
+          itemsContainer.appendChild(div);
+        });
+      }
+  
+      // Enable section
+      section.classList.remove("disabled-section");
+      section.querySelectorAll("input, textarea, button").forEach(el => {
+        el.disabled = false;
+      });
+    });
+    document.querySelectorAll(".summary-section").forEach(section => {
+    const sectionKey = section.getAttribute("data-section");
+      if (!Object.keys(summaryData).some(k => k.toLowerCase() === sectionKey.toLowerCase())) {
+        console.log(`🔻 Disabling unused section: ${sectionKey}`);
+        toggleSection(sectionKey, false);
+      }
+    })  ;
   }
 
   // Populate form with data
@@ -347,7 +427,7 @@
         if (match) match.selected = true;
       }
     }
-
+    
     // Handle equipment (dynamically create missing rooms and items)
     if (data.equip && Object.keys(data.equip).length > 0) {
       const equipSection = document.getElementById("equipment-section");
@@ -387,137 +467,6 @@
         `;
     }
 
-    // ✅ Handle Summary Sections
-    const summarySections = document.querySelectorAll(".summary-section");
-    console.log(`🔹 Found ${summarySections.length} summary sections.`);
-
-    const savedSummary = data.summary || {};
-
-    summarySections.forEach((section, index) => {
-      const titleInput = section.querySelector("input.section-title");
-      const summaryItemsContainer = section.querySelector(".summary-items");
-      const disableBtn = section.querySelector(".disable-btn");
-
-      if (!titleInput || !summaryItemsContainer) {
-        console.warn(`⚠️ Missing elements in summary section ${index + 1}`);
-        return;
-      }
-
-      const defaultTitle = titleInput.dataset.originalTitle || titleInput.value.trim();
-      titleInput.disabled = false; // ✅ Allow editing again
-
-      let matchedKey = Object.keys(savedSummary).find(
-        key => key.toLowerCase() === defaultTitle.toLowerCase()
-      );
-
-      if (!matchedKey) {
-        console.log(`❌ No summary match for '${defaultTitle}'. Disabling section.`);
-        titleInput.value = defaultTitle;
-        //titleInput.disabled = true;
-        summaryItemsContainer.innerHTML = "";
-        if (disableBtn) disableBtn.classList.add("disabled");
-        return;
-      }
-
-      console.log(`✅ Matched summary key: ${matchedKey}`);
-      const content = savedSummary[matchedKey];
-
-      titleInput.value = matchedKey;
-      summaryItemsContainer.innerHTML = "";
-
-      if (Array.isArray(content)) {
-        content.forEach((item) => {
-          const fieldDiv = document.createElement("div");
-          fieldDiv.className = "input-group mb-2";
-          fieldDiv.innerHTML = `
-            <span class="input-group-text">Item</span>
-            <input type="text" class="form-control summary-input" name="${matchedKey}Text" value="${item}" required />
-            <button class="btn btn-danger" type="button" onclick="this.parentNode.remove()">
-              <i class="bi bi-x-square-fill"></i>
-            </button>
-          `;
-          summaryItemsContainer.appendChild(fieldDiv);
-        });
-      } else if (typeof content === "string") {
-        const fieldDiv = document.createElement("div");
-        fieldDiv.className = "input-group mb-2";
-        fieldDiv.innerHTML = `
-          <textarea class="form-control summary-textarea" name="${matchedKey}Area" rows="3" required>${content}</textarea>
-        `;
-        summaryItemsContainer.appendChild(fieldDiv);
-        const addButton = section.querySelector(".add-item-btn");
-        if (addButton) addButton.disabled = true;
-      }
-
-      if (disableBtn) disableBtn.classList.remove("disabled");
-    });
-
-    /* ✅ Handle Summary Sections
-    const summarySections = document.querySelectorAll(".summary-section");
-    console.log(`🔹 Found ${summarySections.length} summary sections.`); // Debug log
-
-    if (summarySections.length === 0) {
-      console.warn("⚠️ No summary sections found! Check your HTML.");
-      return;
-    }
-
-    const summaryOrder = Object.keys(data.summary || {});
-    console.log("📝 Summary Sections in JSON:", summaryOrder);
-
-    summarySections.forEach((section, index) => {
-      console.log(`🔹 Processing summary section ${index + 1}`);
-
-      const titleField = section.querySelector("input.section-title");
-      if (!titleField) {
-        console.warn("⚠️ No title field found for section:", section);
-        return;
-      }
-
-      const originalTitle = titleField.value.trim();
-      console.log(`🎯 Original Title: ${originalTitle}`);
-
-      let sectionName = summaryOrder.find(name => name.toLowerCase().includes(originalTitle.toLowerCase()));
-      if (!sectionName) {
-        console.warn(`🚨 No matching section found for '${originalTitle}' in JSON. Disabling...`);
-        toggleSection(originalTitle, false);
-        return;
-      }
-
-      console.log(`✅ Matched Section Name: ${sectionName}`);
-      titleField.value = sectionName; // Update title if changed
-      toggleSection(originalTitle, true);
-
-      const summaryItemsContainer = section.querySelector(".summary-items");
-      summaryItemsContainer.innerHTML = ""; // Clear existing items
-      const content = data.summary[sectionName];
-
-      if (Array.isArray(content)) {
-        console.log(`📋 Adding ${content.length} text inputs for '${sectionName}'`);
-        content.forEach((item) => {
-          const fieldDiv = document.createElement("div");
-          fieldDiv.className = "input-group mb-2";
-          fieldDiv.innerHTML = `
-                    <input type="text" class="form-control summary-input" name="${sectionName}Text" value="${item}" required />
-                    <button class="btn btn-danger btn-sm" type="button" onclick="this.parentNode.remove()">
-                        <i class="bi bi-x-square-fill"></i>
-                    </button>
-                `;
-          summaryItemsContainer.appendChild(fieldDiv);
-        });
-      } else if (typeof content === "string") {
-        console.log(`📝 Adding textarea for '${sectionName}' with value: ${content}`);
-        const fieldDiv = document.createElement("div");
-        fieldDiv.className = "input-group mb-2";
-        fieldDiv.innerHTML = `
-                <textarea class="form-control summary-textarea" name="${sectionName}Area" rows="3" required>${content}</textarea>
-            `;
-        summaryItemsContainer.appendChild(fieldDiv);
-
-        const addButton = section.querySelector(".add-item-btn");
-        if (addButton) addButton.disabled = true; // Disable "Add Item" button
-      }
-    });*/
-
     // Handle investment sections (dynamically create missing sections and items)
     if (data.invest) {
       const investContainer = document.getElementById("investment-container");
@@ -542,6 +491,9 @@
     document.querySelectorAll('input[type="checkbox"][id$="Bool"]').forEach(cb => {
       cb.dispatchEvent(new Event("change"));
     });
+
+    console.log("Summary Section sent to function: ", data.summary);
+    populateSummarySections(data.summary || {});
 
     await loadAllThumbnails();
 
@@ -957,7 +909,8 @@
 
     // Enable or disable all fields inside the section (except the title)
     inputs.forEach((el) => {
-      if (!el.classList.contains("section-title") && !el.classList.contains("dropdown-toggle")) {
+      //if (!el.classList.contains("section-title") && !el.classList.contains("dropdown-toggle")) {
+      if (!el.classList.contains("dropdown-toggle")) {
         el.disabled = !isEnabled;
       }
     });
@@ -968,9 +921,9 @@
     }
 
     // Ensure title remains disabled
-    if (titleInput) {
-      titleInput.disabled = true;
-    }
+    //if (titleInput) {
+    //  titleInput.disabled = true;
+    //}
 
     // Update dropdown items visibility
     const dropdownItems = sectionContainer.querySelectorAll(".enable-toggle");
@@ -993,6 +946,7 @@
 
   document.getElementById("summaryBool").addEventListener("change", function () {
     const isEnabled = this.checked;
+    console.log("isEnabled value: ", isEnabled);
 
     // Update every summary card so its inputs *and* dropdown reflect the new state
     document
