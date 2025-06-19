@@ -103,13 +103,12 @@
     const summaryDiv = document.createElement('div');
     summaryDiv.className = 'nested-section summary-section';
     summaryDiv.innerHTML = `
-            <div class="col-md-6">
-              <label class="form-label">Summary Name: <input type="text" name="summarySectionName" placeholder="Summary Name" class="form-control" required /></label>
-            <div class="summary-items"></div>
-            <button type="button" class="btn btn-primary btn-sm me-2" onclick="addSummaryItem(this)">Add Item</button>
-            <button type="button" class="btn btn-danger btn-sm" onclick="this.parentNode.remove()">Remove Room</button>
-            </div>
-        `;
+      <div class="col-md-6">
+        <label class="form-label">Summary Name: <input type="text" name="summarySectionName" placeholder="Summary Name" class="form-control" required /></label>
+        <div class="summary-items"></div>
+        <button type="button" class="btn btn-primary btn-sm me-2" onclick="addSummaryItem(this)">Add Item</button>
+        <button type="button" class="btn btn-danger btn-sm" onclick="this.parentNode.remove()">Remove Room</button>
+      </div>`;
     section.appendChild(summaryDiv);
   }
 
@@ -899,11 +898,6 @@
     if (addButton) {
       addButton.disabled = !isEnabled;
     }
-
-    // Ensure title remains disabled
-    //if (titleInput) {
-    //  titleInput.disabled = true;
-    //}
 
     // Update dropdown items visibility
     const dropdownItems = sectionContainer.querySelectorAll(".enable-toggle");
