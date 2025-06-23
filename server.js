@@ -75,7 +75,7 @@ app.post("/generate-pdf", async (req, res) => {
   }
   //docForm.equip = convertJsonToTypstDict(equipSpec)
 
-  if (req.body.summary) {
+  if (req.body.summary && Object.keys(req.body.summary).length > 0) {
     docForm.summary = convertJsonToTypstDict(req.body.summary);
   } else {
     docForm.summary = "()";
