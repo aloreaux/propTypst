@@ -369,6 +369,15 @@
     });
   }
 
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
   // Populate form with data
   async function populateForm(data) {
     const form = document.getElementById("pdf-form");
@@ -428,7 +437,7 @@
               (item) => `
                 <div class="input-group mt-2">
                   <span class="input-group-text">Item</span>
-                      <input type="text" name="equipItem" class="form-control" value="${item}" required />
+                      <input type="text" name="equipItem" class="form-control" value="${escapeHtml(item)}" required />
                   <button type="button" class="btn btn-danger" onclick="this.parentNode.remove()"><i class="bi bi-x-square-fill"></i></button>
                 </div>
                     `
