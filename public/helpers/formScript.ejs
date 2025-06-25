@@ -749,7 +749,7 @@
     showTab(currentTab);
   }
 
-  function validateForm() {
+  /*function validateForm() {
     var tabs = document.getElementsByClassName("tab");
     var currentSection = tabs[currentTab]; // Get current section
     var valid = true;
@@ -775,6 +775,66 @@
     });
 
     console.log(valid ? "✅ Validation Passed" : "⛔ Validation Failed");
+    return valid;
+  }*/
+
+  function validateForm() {
+    const tabs = document.getElementsByClassName("tab");
+    const currentSection = tabs[currentTab];
+    let valid = true;
+  
+    // Clear any existing inline alerts
+    let existingAlert = document.getElementById("form-validation-alert");
+    if (existingAlert) {
+      existingAlert.remove();
+    }
+  
+    // ✅ Find all enabled, visible, required inputs or textareas in the current tab
+    const fields = currentSection.querySelectorAll("input[required]:not(:disabled), textarea[required]:not(:disabled)");
+  
+    fields.forEach((field) => {
+      const style = window.getComputedStyle(field);
+      if (style.display === "none" || style.visibility === "hidden") return;
+  
+      /*if (!field.value.trim()) {
+        field.classList.add("is-invalid"); // Bootstrap red border
+        valid = false;
+      } else {
+        field.classList.remove("is-invalid");
+      }*/
+      
+    // ✅ Add listener to remove red border as user types
+      field.addEventListener("input", () => {
+        if (field.value.trim()) {
+          field.classList.remove("is-invalid");
+        }
+      });
+
+      // ✅ Check current value
+      if (!field.value.trim()) {
+        field.classList.add("is-invalid");
+        valid = false;
+      } else {
+        field.classList.remove("is-invalid");
+      }
+    });
+  
+    if (!valid) {
+      // Create inline Bootstrap alert
+      const alertDiv = document.createElement("div");
+      alertDiv.id = "form-validation-alert";
+      alertDiv.className = "alert alert-danger alert-dismissible fade show";
+      alertDiv.role = "alert";
+      //alertDiv.innerText = "⚠️ Please fill out all required fields before continuing.";
+      alertDiv.innerHTML = `
+        <i class="bi bi-exclamation-triangle"></i>
+        <strong>Please complete all required fields.</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      `;
+      // Append the alert at the top of the current section (or wherever you prefer)
+      currentSection.prepend(alertDiv);
+    }
+  
     return valid;
   }
 
