@@ -146,6 +146,7 @@
     }
     investDiv.querySelector('input[name="investSectionName"]').value = name;
     investDiv.querySelector('input[name="investPrice"]').value = price;
+    attachCommaFormatting(investDiv.querySelector('input[name="investPrice"]'));
 
     const itemsContainer = investDiv.querySelector(".invest-items");
     items.forEach((text) => {
@@ -402,7 +403,7 @@
       }
     });
 
-    const state = form.querySelector('[name="state"]')?.value;
+    /*const state = form.querySelector('[name="state"]')?.value;
     const city = form.querySelector('[name="city"]')?.value;
     const zipField = form.querySelector('[name="zip"]');
 
@@ -413,6 +414,32 @@
         const zipToSelect = String(data.zip).padStart(5, "0");
         const match = Array.from(zipField.options).find(opt => opt.value === zipToSelect);
         if (match) match.selected = true;
+      }
+    }*/
+    // ✅ Populate State, then Cities, then ZIP
+    const stateSelect = form.querySelector('[name="state"]');
+    const citySelect = form.querySelector('[name="city"]');
+    const zipSelect = form.querySelector('[name="zip"]');
+    
+    if (stateSelect && citySelect && zipSelect) {
+      const jsonState = data.state || "MA";
+      const jsonCity = data.city || "";
+      const jsonZip = data.zip ? String(data.zip).padStart(5, "0") : "";
+    
+      // Set state and rebuild cities dropdown
+      stateSelect.value = jsonState;
+      populateCitiesAndZip(jsonState, citySelect, zipSelect);
+    
+      // Set city and rebuild zip dropdown
+      if (jsonCity) {
+        citySelect.value = jsonCity;
+        updateZipFromCity(jsonState, jsonCity, zipSelect);
+      }
+    
+      // Finally, set the correct zip
+      if (jsonZip) {
+        const zipOption = Array.from(zipSelect.options).find(opt => opt.value === jsonZip);
+        if (zipOption) zipOption.selected = true;
       }
     }
     
@@ -463,6 +490,9 @@
         addInvestSection(sectionName, items || [], price || "");
       });
     }
+
+    // After populating investments
+    document.querySelectorAll('input[name="investPrice"]').forEach(field => attachCommaFormatting(field));`I`
 
     // Dynamically toggle all sections based on checkbox states
     document.querySelectorAll('input[type="checkbox"][id$="Bool"]').forEach(checkbox => {
@@ -567,12 +597,20 @@
     });
   }
 
+  function numberWithCommas(input) {
+    const rawValue = removeCommas(input.value);
+    const formattedValue = addCommas(rawValue);
+    input.value = formattedValue;
+  }
+
   function addCommas(x) {
     return x.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
   }
 
   // Event listener to format price inputs with commas as the user types
   function attachCommaFormatting(input) {
+    numberWithCommas(input);
+
     input.addEventListener("input", (e) => {
       const cursorPosition = input.selectionStart;
       const originalValue = input.value;
