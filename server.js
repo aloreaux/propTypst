@@ -214,7 +214,11 @@ function isTypstDictionaryString(value) {
 }
 
 function escapeTypstString(str) {
-  return str.replace(/"/g, '\\"');
+  return str
+    .replace(/"/g, '\\"')
+    .replace(/\$/g, '\\$')
+    .replace(/\@/g, '\\@')
+    .replace(/{/g, '\\{').replace(/}/g, '\\}');
 }
 
 function convertJsonToTypstDict(jsonObject) {
