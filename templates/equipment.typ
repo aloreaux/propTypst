@@ -4,10 +4,13 @@
 
 #set align(horizon)
 #context {
-  for (room, items) in equip-state.get() {
+  for (room, data) in equip-state.get() {
+    if data.newPage == true {
+      pagebreak()
+    }
     text(size: 18pt)[*#room*]
     linebreak()
-    for item in items {
+    for item in data.items {
       list(indent: 1em)[
         #eval(item, mode: "markup")
       ]

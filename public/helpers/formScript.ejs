@@ -69,6 +69,16 @@
     }
   }
 
+  function refreshNewPageCheckboxes() {
+    const rooms = document.querySelectorAll('.equip-room');
+    rooms.forEach((room, idx) => {
+      const toggle = room.querySelector('.new-page-toggle');
+      if (toggle) {
+        toggle.style.display = idx === 0 ? 'none' : 'block';
+      }
+    });
+  }
+
   function addEquipSection() {
     const section = document.getElementById('equipment-section');
     const tmpl = document.getElementById('tmpl-equip-room');
@@ -77,6 +87,7 @@
     const clone = tmpl.content.cloneNode(true);
     section.appendChild(clone);
     initializeDragAndDrop();
+    refreshNewPageCheckboxes();
   }
 
   function addEquipItem(button) {
@@ -447,7 +458,10 @@
     if (data.equip && Object.keys(data.equip).length > 0) {
       const equipSection = document.getElementById("equipment-section");
       equipSection.innerHTML = `<button type="button" class="btn btn-primary mb-3" onclick="addEquipSection()">Add Room</button>`; // Clear existing equipment
-      Object.entries(data.equip).forEach(([roomName, items]) => {
+      Object.entries(data.equip).forEach(([roomName, roomData], idx) => {
+        const items = roomData.items || [];
+        const newPage = roomData.newPage || false;
+
         const roomDiv = document.createElement("div");
         roomDiv.className = "card nested-section equip-room mb-2";
         roomDiv.innerHTML = `
@@ -457,17 +471,21 @@
                     <input type="text" name="equipRoomName" placeholder="Room Name" class="form-control" value="${roomName}" required />
                     <button type="button" class="btn btn-primary" onclick="addEquipItem(this)">Add Item</button>
                     <button type="button" class="btn btn-danger" onclick="this.closest('.equip-room').remove()">Remove Room</button>
+                    <div class="form-check mx-2 mt-2 new-page-toggle" style="display: ${idx === 0 ? 'none' : 'block'};">
+                      <input class="form-check-input" type="checkbox" name="equipNewPage" ${newPage ? 'checked' : ''} />
+                      <label class="form-check-label">
+                        New Page
+                      </label>
+                    </div>
                   </div>
                   <div class="equip-items">
-                ${items
-            .map(
-              (item) => `
+                ${items.map(item => `
                 <div class="input-group mt-2">
                   <span class="input-group-text">Item</span>
                       <input type="text" name="equipItem" class="form-control" value="${escapeHtml(item)}" required />
                   <button type="button" class="btn btn-danger" onclick="this.parentNode.remove()"><i class="bi bi-x-square-fill"></i></button>
                 </div>
-                    `
+                `
             )
             .join("")}
                 </div>
@@ -558,6 +576,7 @@
         const rect = target.getBoundingClientRect();
         const after = (e.clientY - rect.top) > rect.height / 2;
         container.insertBefore(dragging, after ? target.nextSibling : target);
+        refreshNewPageCheckboxes();
       });
     });
 
@@ -664,12 +683,18 @@
     const equipSections = document.querySelectorAll('.equip-room');
     equipSections.forEach((section) => {
       const roomName = section.querySelector('[name="equipRoomName"]').value.trim();
+      const newPageCheckbox = section.querySelector('[name="equipNewPage"]');
+      const newPage = newPageCheckbox ? newPageCheckbox.checked : false;
+
       if (roomName) {
         const items = Array.from(section.querySelectorAll('[name="equipItem"]'))
           .map((item) => item.value.trim())
           .filter((item) => item);
         if (items.length > 0) {
-          data.equip[roomName] = items;
+          data.equip[roomName] = { 
+            items: items,
+            newPage: newPage
+          };
         }
       }
     });

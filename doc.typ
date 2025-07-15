@@ -54,7 +54,9 @@
 
 #include "/templates/custaccept.typ"
 
-#include "/templates/sov.typ"
+#if ($sovBool$) {
+  include "/templates/sov.typ"
+}
 
 #include "/templates/terms.typ"
 
