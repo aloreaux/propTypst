@@ -219,6 +219,7 @@ function escapeTypstString(str) {
     .replace(/"/g, '\\"')
     .replace(/\$/g, '\\$')
     .replace(/\@/g, '\\@')
+    .replace(/\#/g, '\\#')
     .replace(/{/g, '\\{').replace(/}/g, '\\}');
 }
 
