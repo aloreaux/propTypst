@@ -43,7 +43,7 @@ Thank you very much for this opportunity and your business!
 #align(center)[
   *#donn-name\ 
   #donn-address\ 
-  #donn-city #donn-state, #donn-zip*
+  #donn-city, #donn-state #donn-zip*
   #v(1fr)
   _\* This proposal is valid for 14 days_
 ]
