@@ -10,7 +10,7 @@
   #context {
     text(font: "Concourse C2", size: 18pt, weight: "regular")[
       #address-state.get()\ 
-      #city-state.get() #state-state.get(), #zip-state.get()
+      #city-state.get(), #state-state.get() #zip-state.get()
     ]
   }
 ]
