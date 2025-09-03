@@ -214,13 +214,42 @@ function isTypstDictionaryString(value) {
   );
 }
 
-function escapeTypstString(str) {
+/*function escapeTypstString(str) {
   return str
     .replace(/"/g, '\\"')
     .replace(/\$/g, '\\$')
     .replace(/\@/g, '\\@')
     .replace(/\#/g, '\\#')
-    .replace(/{/g, '\\{').replace(/}/g, '\\}');
+    .replace(/{/g, '\\{').replace(/}/g, '\\}')
+    .replace(/(?<!\*)\*(?!\*)/g, '\\*');
+}*/
+
+// Escapes lone asterisks while preserving Typst bold spans *...*.
+// Also respects user-escaped \* so it doesn't get double-escaped.
+function escapeTypstString(str) {
+  // 1) Temporarily protect real bold spans so we don't touch their asterisks.
+  //    We only match unescaped *...* on a single line.
+  const kept = [];
+  const protectedStr = str.replace(/(?<!\\)\*([^*\n]+?)(?<!\\)\*/g, (m) => {
+    kept.push(m);
+    return `<<BOLD${kept.length - 1}>>`; // human-readable placeholder
+  });
+
+  // 2) Escape any remaining unescaped * so they render literally.
+  //    Negative lookbehind so \* stays \* (no double-escape).
+  let escaped = protectedStr.replace(/(?<!\\)\*/g, '\\*');
+
+  // 3) Restore the real bold spans.
+  escaped = escaped.replace(/<<BOLD(\d+)>>/g, (_, i) => kept[i]);
+
+  // 4) Keep your other Typst escaping rules.
+  return escaped
+    .replace(/"/g, '\\"')
+    .replace(/\$/g, '\\$')
+    .replace(/@/g, '\\@')
+    .replace(/#/g, '\\#')
+    .replace(/{/g, '\\{')
+    .replace(/}/g, '\\}');
 }
 
 function convertJsonToTypstDict(jsonObject) {
