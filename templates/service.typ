@@ -70,8 +70,6 @@ The maintenance provided shall include preventative maintenance & corrective mai
 
 Preventative maintenance as required shall be performed during established business hours Monday through Friday. This service may be performed in connection with corrective maintenance. Preventative maintenance shall consist of lubrication, necessary adjustments and replacement of unserviceable parts.\ 
 
-Corrective maintenance shall consist of on call remedial maintenance.\ 
-
 Service requested by the customer during other than established business hours will be charged at the rates then in effect, including travel time and expense.\ 
 
 MAINTENANCE SERVICE AND PARTS REPLACEMENT DOES NOT COVER REPAIRS OR PARTS RFEQUIRED BECAUSE OF AN ACCIDENT, FIRE, WATER, ABUSE OR MISUSE, NOR DOES IT COVER CHANGES IN SETUP, NOR, IN THE CASE OF MICROFILM EQUIPMENT, DOES IT INCLUDE BURNED OUT MOTORS, LAMPS, MIRRORS, RUBBER SLEEVES, SPONGES, SCREENS AND EXPENDABLE PARTS.\ 
