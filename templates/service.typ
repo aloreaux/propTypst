@@ -9,26 +9,24 @@
 
 = Preventitive Maintenance & Service Agreement
 
-#text(size: 14pt)[Donnegan Systems, Inc. stands behind its industry leading products with preventative maintenance and emergency services. These preventative maintenance and emergency services (PM/ES Agreement) assure that the equipment is in productive condition at all times thus eliminating nonproductive downtime, reducing maintenance costs, extending equipment life, and protecting the investment that the equipment was purchased for initially.\ 
+#text(size: 14pt)[Donnegan Systems, Inc. stands behind its industry leading products with preventative maintenance. These preventative maintenance (PM Agreement) assure that the equipment is in productive condition at all times thus eliminating nonproductive downtime, reducing maintenance costs, extending equipment life, and protecting the investment that the equipment was purchased for initially.\ 
 
-These preventative maintenance and emergency services are covered as a part of your PM/ES Agreement and will begin on completion of installalation.
+These preventative maintenance are covered as a part of your PM Agreement and will begin on completion of installation.
 ]
 
 #v(1fr)
 
 #set enum(indent: 1em)
 #text(size: 12pt)[
-  + *A minimum of one to a maximum of two preventative maintenance sessions will be performed within [12] months.* This service is performed by direct employed, factory-certified, service and installation personnel and includes a multi-point equipment inspection, all lubrications and adjustments as necessary, and replacement of worn or unserviceable parts as recommended by the manufacturer. PM’s may be performed during normal corrective repair visits.
-  + *Unlimited emergency service calls* will be performed during Donnegan Systems’ established business hours.
-  + *Priority service* attention is provided to equipment covered by a PM/ES Agreement before service is rendered to other equipment that is not covered by such an agreement.
-  + Equipment covered by a PM/ES Agreement will *have a higher trade in and/or resale value* than equipment that is not under proper maintenance.
+  + *One [1] preventative maintenance inspection shall be performed every [12] months during the term of this agreement.* This service is performed by direct employed, factory-certified, service and installation personnel and includes a multi-point equipment inspection, all lubrications and adjustments as necessary, and replacement of worn or unserviceable parts as recommended by the manufacturer. PM’s may be performed during normal corrective repair visits.
+  + *Priority service* attention is provided to equipment covered by a PM Agreement before service is rendered to other equipment that is not covered by such an agreement.
   + *A 20% discount on parts* after the initial 5 year manufacturer's defect warranty.
 ]
 
 #v(1fr)
 
 #text(size: 14pt)[
-  To ensure Continued Service, please sign and return the enclosed agreement. Feel free to call (800) 222-6311 x229 should you have any questions regarding this PM/ES Agreement covering your Equipment.
+  To ensure Continued Service, please sign and return the enclosed agreement. Feel free to call (800) 222-6311 x229 should you have any questions regarding this PM Agreement covering your Equipment.
 ]
 #pagebreak()
 
@@ -36,7 +34,7 @@ These preventative maintenance and emergency services are covered as a part of y
 
 #text(size: 14pt)[
 #v(1fr)
-Under a Donnegan Systems PM/ES Agreement, Spacesaver modules receive comprehensive inspections, adjustments, and parts replacements as necessary during preventive maintenance calls.
+Under a Donnegan Systems PM Agreement, Spacesaver modules receive comprehensive inspections, adjustments, and parts replacements as necessary during preventive maintenance calls.
 #v(1fr)
 
 + Drive Chains – tension check, chain wear, squeaks and lubrication
