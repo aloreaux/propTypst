@@ -44,7 +44,8 @@
   
   for (k,v) in invest-state.get() {
     if v.at("price", default: 0) != 0 {
-      total.push(decimal(v.at("price")))
+      let clean = v.at("price").trim()
+      total.push(decimal(clean))
     }
   }
 
@@ -69,7 +70,8 @@
         []
       } else {
         if data.at("price", default: 0) != 0 {
-          [#format_dollars(decimal(data.at("price")))]
+          let clean = data.at("price").trim()
+          [#format_dollars(decimal(clean))]
         } else {
           []
         }

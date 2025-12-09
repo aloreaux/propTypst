@@ -9,7 +9,8 @@
 
   for (k,v) in invest-state.get() {
     if v.at("price", default: 0) != 0 {
-      total.push(decimal(v.at("price")))
+      let clean = v.at("price").trim()
+      total.push(decimal(clean))
     }
   }
 
