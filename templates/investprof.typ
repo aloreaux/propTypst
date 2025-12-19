@@ -78,7 +78,14 @@
       }
     )},
     table.hline(),
-    table.footer([*Total Price* #text(size: 12pt)[_\*State Sales Tax, if applicable, is not included\*_]],[*#format_dollars(total.sum(default: 0))*],)
+      // ✅ one final "total" row (not a footer)
+    table.hline(),
+    [
+      *Total Price*
+      #text(size: 12pt)[_\*State Sales Tax, if applicable, is not included\*_]
+    ],
+    [*#format_dollars(total.sum(default: 0))*],
+    //table.footer([*Total Price* #text(size: 12pt)[_\*State Sales Tax, if applicable, is not included\*_]],[*#format_dollars(total.sum(default: 0))*],)
   )
   if (off52.get()) {
     align(left)[#text(size: 14pt)[*Contract: OFF52*\ *Vendor Code: VC6000163876*]]

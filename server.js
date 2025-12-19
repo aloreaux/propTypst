@@ -244,6 +244,7 @@ function escapeTypstString(str) {
 
   // 4) Keep your other Typst escaping rules.
   return escaped
+    .replace(/\\/g, '\\\\')
     .replace(/"/g, '\\"')
     .replace(/\$/g, '\\$')
     .replace(/@/g, '\\@')
@@ -252,7 +253,18 @@ function escapeTypstString(str) {
     .replace(/}/g, '\\}');
 }
 
+function normalizeKey(k) {
+  k = String(k).trim();
+  // Strip *all* wrapping quote layers
+  while (k.length >= 2 && k.startsWith('"') && k.endsWith('"')) {
+    k = k.slice(1, -1).trim();
+  }
+  return k;
+}
+
 function convertJsonToTypstDict(jsonObject) {
+  const formatKey = (k) => `"${escapeTypstString(normalizeKey(k))}"`;
+
   const formatValue = (value) => {
     if (Array.isArray(value)) {
       /*// Convert arrays to Typst tuple format with parentheses
@@ -276,7 +288,7 @@ function convertJsonToTypstDict(jsonObject) {
       // Handle nested objects
       let nestedDict = "(";
       for (const [nestedKey, nestedValue] of Object.entries(value)) {
-        nestedDict += `${nestedKey}: ${formatValue(nestedValue)}, `;
+        nestedDict += `${formatKey(nestedKey)}: ${formatValue(nestedValue)}, `;
       }
       return nestedDict.slice(0, -2) + ")";
     } else if (value === null || value === undefined) {
@@ -292,7 +304,7 @@ function convertJsonToTypstDict(jsonObject) {
   let typstDict = "(";
   for (const [key, value] of Object.entries(jsonObject)) {
     if (value !== undefined && value !== null) {
-      typstDict += `"${key}": ${formatValue(value)}, `;
+      typstDict += `${formatKey(key)}: ${formatValue(value)}, `;
     }
   }
   return typstDict.slice(0, -2) + ")";
