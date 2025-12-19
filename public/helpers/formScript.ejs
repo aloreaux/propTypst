@@ -468,7 +468,7 @@
                 <div class="col-md p-2">
                   <div class="input-group">
                     <span class="input-group-text">Room Name</span>
-                    <input type="text" name="equipRoomName" placeholder="Room Name" class="form-control" value="${roomName}" required />
+                    <input type="text" name="equipRoomName" placeholder="Room Name" class="form-control" value="${escapeHtml(roomName)}" required />
                     <button type="button" class="btn btn-primary" onclick="addEquipItem(this)">Add Item</button>
                     <button type="button" class="btn btn-danger" onclick="this.closest('.equip-room').remove()">Remove Room</button>
                     <div class="form-check mx-2 mt-2 new-page-toggle" style="display: ${idx === 0 ? 'none' : 'block'};">
